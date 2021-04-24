@@ -23,15 +23,19 @@ class NanoEditor:
                 colored_line = term.white_on_black(line[: self.cursor[0]])
                 if len(line) == self.cursor[0]:  # cursor is hanging out after the line
                     colored_line += term.black_on_white(" ")
+                    # One extra char for cursor
+                    colored_line += term.white_on_black(" " * (self.size[0] - len(line) - 1))
                 elif len(line) == self.cursor[0] + 1:  # cursor is on last char of line
                     colored_line += term.black_on_white(line[self.cursor[0]])
+                    colored_line += term.white_on_black(" " * (self.size[0] - len(line)))
                 else:
                     colored_line += term.black_on_white(line[self.cursor[0]])
                     colored_line += term.white_on_black(line[self.cursor[0] + 1 :])
+                    colored_line += term.white_on_black(" " * (self.size[0] - len(line)))
             else:
                 colored_line = term.white_on_black(line)
+                colored_line += term.white_on_black(" " * (self.size[0] - len(line)))
 
-            colored_line = colored_line + term.white_on_black(" " * (self.size[0] - len(line)))
             print(term.move_xy(self.origin[0], self.origin[1] + y) + colored_line)
 
     def keypress(self, inp):

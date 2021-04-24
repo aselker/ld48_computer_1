@@ -1,19 +1,16 @@
 class UCode:
     @classmethod
-    def split_insts(cls, string):
-        assert False, "Deprecated"
-        insts = [inst.split(" ") for inst in string.split("\n")]
-        for inst in insts:
-            del inst[1] # Equal sign
-            if len(inst) == 3:
-                inst.append("")
-        return insts
-
-    @classmethod
     def parse(cls, lines):
         insts = []
         for line in lines:
-            words = line.split(" ")
+            if type(line) is list:
+                line = "".join(line)
+
+            # Skip blank lines
+            if line == "":
+                continue
+
+            words = line.lower().split(" ")
 
             # Prelim len check, rm equal sign
             if len(words) < 4 or words[1] != "=":

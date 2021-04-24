@@ -1,5 +1,7 @@
 from blessed import Terminal
 
+from ucode import UCode
+
 
 class OverviewScreen:
     """
@@ -195,7 +197,11 @@ class UcodeEditor:
         )
 
     def _evaluate(self):
-        # self.code_editor.highlighted_lines = [2,5] # XXX
+        insts = UCode.parse(self.code_editor.contents)
+        print(insts)
+        self.code_editor.highlighted_lines = [i for i, inst in enumerate(insts) if inst is None]
+        if len(self.code_editor.highlighted_lines) == 0:
+            print("Aaaaaand run!")
 
 
     def draw(self):

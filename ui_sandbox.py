@@ -64,6 +64,7 @@ class NanoEditor:
         self.size = size
         self.cursor = [0, 0]
         self.is_focused = True
+        self.highlighted_lines = []
 
         if contents is None:
             self.contents = [[] for _ in range(self.size[1])]
@@ -83,24 +84,32 @@ class NanoEditor:
     def draw(self):
         for y, line in enumerate(self.contents):
             line = "".join(line)
+
+            line_color = (
+                self.term.white_on_black if (y not in self.highlighted_lines) else self.term.black_on_red
+            )
+            cursor_color = (
+                self.term.black_on_white if (y not in self.highlighted_lines) else self.term.black_on_white
+            )
+
             if self.cursor[1] == y and self.is_focused:
                 assert self.cursor[0] <= len(line)
                 assert self.cursor[0] <= self.size[0] - 1
-                colored_line = self.term.white_on_black(line[: self.cursor[0]])
+                colored_line = line_color(line[: self.cursor[0]])
                 if len(line) == self.cursor[0]:  # cursor is hanging out after the line
-                    colored_line += self.term.black_on_white(" ")
+                    colored_line += cursor_color(" ")
                     # One extra char for cursor
-                    colored_line += self.term.white_on_black(" " * (self.size[0] - len(line) - 1))
+                    colored_line += line_color(" " * (self.size[0] - len(line) - 1))
                 elif len(line) == self.cursor[0] + 1:  # cursor is on last char of line
-                    colored_line += self.term.black_on_white(line[self.cursor[0]])
-                    colored_line += self.term.white_on_black(" " * (self.size[0] - len(line)))
+                    colored_line += cursor_color(line[self.cursor[0]])
+                    colored_line += line_color(" " * (self.size[0] - len(line)))
                 else:
-                    colored_line += self.term.black_on_white(line[self.cursor[0]])
-                    colored_line += self.term.white_on_black(line[self.cursor[0] + 1 :])
-                    colored_line += self.term.white_on_black(" " * (self.size[0] - len(line)))
+                    colored_line += cursor_color(line[self.cursor[0]])
+                    colored_line += line_color(line[self.cursor[0] + 1 :])
+                    colored_line += line_color(" " * (self.size[0] - len(line)))
             else:
-                colored_line = self.term.white_on_black(line)
-                colored_line += self.term.white_on_black(" " * (self.size[0] - len(line)))
+                colored_line = line_color(line)
+                colored_line += line_color(" " * (self.size[0] - len(line)))
 
             print(self.term.move_xy(self.origin[0], self.origin[1] + y) + colored_line)
 
@@ -163,16 +172,10 @@ class UcodeEditor:
         self.code_editor.edit_callback = self._evaluate
         self.code_editor.is_focused = False
 
-        # self.i1_editor,
-        # self.i2_editor,
-        # self.a_editor,
-        # self.r_editor,
-        # self.o_editor,
-        # self.j_editor,
         self.reg_editors = [None] * 6
         for i in range(6):
             x = CODE_WIDTH + 4
-            y = 1 + 4 * i + (0 if i<3 else 2)
+            y = 1 + 4 * i + (0 if i < 3 else 2)
             editor = NanoEditor(term, (x, y), (6, 1))
             editor.edit_callback = self._evaluate
             editor.is_focused = False
@@ -192,7 +195,8 @@ class UcodeEditor:
         )
 
     def _evaluate(self):
-        pass
+        # self.code_editor.highlighted_lines = [2,5] # XXX
+
 
     def draw(self):
 
@@ -206,7 +210,6 @@ class UcodeEditor:
         ):
             self._outline_editor(editor, title=title, is_highlighted=(self.cursor == [1, i]))
             editor.draw()
-
 
     @property
     def _highlighted_editor(self):

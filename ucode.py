@@ -1,12 +1,72 @@
 class UCode:
     @classmethod
     def split_insts(cls, string):
+        assert False, "Deprecated"
         insts = [inst.split(" ") for inst in string.split("\n")]
         for inst in insts:
             del inst[1] # Equal sign
             if len(inst) == 3:
                 inst.append("")
         return insts
+
+    @classmethod
+    def parse(cls, lines):
+        insts = []
+        for line in lines:
+            words = line.split(" ")
+
+            # Prelim len check, rm equal sign
+            if len(words) < 4 or words[1] != "=":
+                insts.append(None)
+                continue
+            del(words[1])
+
+            # Check number of arguments
+            num_args = {
+                "buf": 1,
+                "not": 1,
+                "and": 2,
+                "or": 2,
+                "nand": 2,
+                "nor": 2,
+                "xor": 2,
+                "xnor": 2,
+                "if": 3,}
+            if len(words) != num_args.get(words[1], -999) + 2:
+                insts.append(None)
+                continue
+
+            # Check reg names
+            ok = True
+            for name in [words[0]] + words[2:]:
+                if len(name) < 2 or 3 < len(name) or not name[1:].isdigit():
+                    ok = False
+                    break
+
+                if name[0] in ["c"]:
+                    if int(name[1:]) < 1 or 2 < int(name[1:]) :
+                        ok = False
+                        break
+                elif name[0] in ["r", "o", "a", "j"]:
+                    if int(name[1:]) < 1 or 6 < int(name[1:]) :
+                        ok = False
+                        break
+                elif name[0] in ["i"]:
+                    if int(name[1:]) < 1 or 12 < int(name[1:]) :
+                        ok = False
+                        break
+                else:
+                    ok = False
+                    break
+            if ok:
+                insts.append(words)
+            else:
+                insts.append(None)
+                continue
+
+        return insts
+
+
 
     def __init__(self, insts):
         self.user_regs = [False] * 6
@@ -48,20 +108,22 @@ class UCode:
             self.jump_regs[index] = value
 
     def run_single_instruction(self, inst):
-        arg1 = self.get_reg(inst[2])
-        arg2 = self.get_reg(inst[3]) if inst[3] else False
+        print(inst)
+        args = [self.get_reg(arg) for arg in inst[2:]] + [False]*3 # Buffer for unused
+        print(args)
 
         self.set_reg(
             inst[0],
             {
-                "buf": arg1,
-                "not": arg1,
-                "and": arg1 and arg2,
-                "or": arg1 or arg2,
-                "nand": not (arg1 and arg2),
-                "nor": not (arg1 or arg2),
-                "xor": (arg1 and not arg2) or (not arg1 and arg2),
-                "xnor": (arg1 and arg2) or (not arg1 and not arg2),
+                "buf": args[0],
+                "not": args[0],
+                "and": args[0] and args[1],
+                "or": args[0] or args[1],
+                "nand": not (args[0] and args[1]),
+                "nor": not (args[0] or args[1]),
+                "xor": (args[0] and not args[1]) or (not args[0] and args[1]),
+                "xnor": (args[0] and args[1]) or (not args[0] and not args[1]),
+                "if": args[1] if args[0] else args[2],
             }[inst[1]],
         )
 

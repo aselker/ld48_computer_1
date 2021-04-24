@@ -196,13 +196,29 @@ class UcodeEditor:
             title=title,
         )
 
+    def _string_to_bools(self, string):
+        assert all([c == "0" or c == "1" for c in string])
+        return [c == "1" for c in string]
+
+    def _bools_to_string(self, bools):
+        return ["1" if b else "0" for b in bools]
+
     def _evaluate(self):
+        # TODO: Check if inputs have only 1's and 0's
         insts = UCode.parse(self.code_editor.contents)
-        print(insts)
         self.code_editor.highlighted_lines = [i for i, inst in enumerate(insts) if inst is None]
         if len(self.code_editor.highlighted_lines) == 0:
-            print("Aaaaaand run!")
+            input1 = self._string_to_bools(self.reg_editors[0].contents[0])
+            input2 = self._string_to_bools(self.reg_editors[1].contents[1])
+            addr = self._string_to_bools(self.reg_editors[2].contents[2])
 
+            code = UCode(insts)
+            user, output, jump = code.run(input1, input2, addr)
+            self.reg_editors[3].contents = self._bools_to_string(user)
+            self.reg_editors[4].contents = self._bools_to_string(output)
+            self.reg_editors[5].contents = self._bools_to_string(jump)
+
+            self.draw()
 
     def draw(self):
 

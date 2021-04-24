@@ -6,8 +6,9 @@ class UCode:
             if type(line) is list:
                 line = "".join(line)
 
-            # Skip blank lines
+            # Blank line -> blank instruction
             if line == "":
+                insts.append([])
                 continue
 
             words = line.lower().split(" ")
@@ -44,7 +45,7 @@ class UCode:
                     if int(name[1:]) < 1 or 2 < int(name[1:]) :
                         ok = False
                         break
-                elif name[0] in ["r", "o", "a", "j"]:
+                elif name[0] in ["u", "o", "a", "j"]:
                     if int(name[1:]) < 1 or 6 < int(name[1:]) :
                         ok = False
                         break
@@ -75,7 +76,7 @@ class UCode:
     def get_reg(self, name):
         bank = name[0]
         index = int(name[1]) - 1
-        if bank == "r":
+        if bank == "u":
             return self.user_regs[index]
         elif bank == "c":
             return bool(index)
@@ -91,7 +92,7 @@ class UCode:
     def set_reg(self, name, value):
         bank = name[0]
         index = int(name[1]) - 1
-        if bank == "r":
+        if bank == "u":
             self.user_regs[index] = value
         elif bank == "c":
             pass
@@ -105,9 +106,10 @@ class UCode:
             self.jump_regs[index] = value
 
     def run_single_instruction(self, inst):
-        print(inst)
+        if not inst:
+            return
+
         args = [self.get_reg(arg) for arg in inst[2:]] + [False]*3 # Buffer for unused
-        print(args)
 
         self.set_reg(
             inst[0],
@@ -132,4 +134,4 @@ class UCode:
         for inst in self.insts:
             self.run_single_instruction(inst)
 
-        return self.output_regs, self.jump_regs
+        return self.user_regs, self.output_regs, self.jump_regs

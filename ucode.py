@@ -11,9 +11,9 @@ XOR  (2 arg): 1 if exactly one arg is 1
 XNOR (2 arg): Inverted xor
 
 Example:
-    U1 = BUF I10
-    U2 = XOR I3 I4
-    O1 = IF U1 U2 I1"""
+U1 = BUF I10
+U2 = XOR I3 I4
+O1 = IF U1 U2 I1"""
 
 
 class UCode:

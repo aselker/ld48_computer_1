@@ -51,6 +51,9 @@ class UcodeEditor:
             self.reg_editors[5].contents = [bools_to_chars(jump)]
 
             self.draw()
+        else:
+            for i in [3,4,5]:
+                self.reg_editors[i].contents = [[]]
 
     def draw(self):
         # Clear the screen
@@ -61,7 +64,7 @@ class UcodeEditor:
             outline_color = self.term.black_on_white if (self.cursor[0] == 0) else self.term.white_on_black
         else:
             outline_color = self.term.black_on_green if (self.cursor[0] == 0) else self.term.green_on_black
-        outline_editor(self.term, self.code_editor, title="MICROCODE", color=outline_color)
+        outline_editor(self.term, self.code_editor, title="DEEPER MICROCODE", color=outline_color)
         self.code_editor.draw()
 
         outline_editor(self.term, self.info_editor, title="INFO", color=self.term.white_on_black)

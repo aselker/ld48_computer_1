@@ -22,30 +22,30 @@ class AsmEditor:
         self.asm.stack = self.puzzle[2][0].copy()
         self._fill_stack_editor()
 
-        self.code_editor = NanoEditor(term, (self.STACK_WIDTH + 5, 1), (self.CODE_WIDTH, self.CODE_HEIGHT))
+        self.code_editor = NanoEditor(term, (self.STACK_WIDTH + 6, 1), (self.CODE_WIDTH, self.CODE_HEIGHT))
         self.code_editor.edit_callback = self._parse
         self.code_editor.is_focused = False
 
         self.output_editor = NanoEditor(
-            term, (self.STACK_WIDTH + self.CODE_WIDTH + 18, 1), (self.STACK_WIDTH, self.STACK_HEIGHT)
+            term, (self.STACK_WIDTH + self.CODE_WIDTH + 19, 1), (self.STACK_WIDTH, self.STACK_HEIGHT)
         )
         self.output_editor.is_focused = False
 
         self.info_editor = NanoEditor(
-                term, (self.STACK_WIDTH*2 + self.CODE_WIDTH + 21, 1), (41, self.STACK_HEIGHT)
-                )
+            term, (self.STACK_WIDTH * 2 + self.CODE_WIDTH + 22, 1), (41, self.STACK_HEIGHT)
+        )
         self.info_editor.is_focused = False
-        info = ["Goal:", self.puzzle[1], ""] + asm_ref_sheet.split("\n")
+        info = ["Goal:"] + self.puzzle[1].split("\n") + [""] + asm_ref_sheet.split("\n")
         self.info_editor.contents = [list(line) for line in info]
 
         # Ucode editor buttons, and RUN button
         self.left_buttons = []
         for i in range(4):
-            x = self.STACK_WIDTH + self.CODE_WIDTH + 8
+            x = self.STACK_WIDTH + self.CODE_WIDTH + 9
             y = 1 + 4 * i + (0 if i < 3 else 2)
             editor = NanoEditor(self.term, (x, y), (7, 1))
             editor.is_focused = False
-            editor.contents = "EDIT" if i < 3 else "RUN ASM"
+            editor.contents = "EDIT" if i < 3 else ""
             editor.contents = [list(editor.contents)]
 
             self.left_buttons.append(editor)
@@ -61,7 +61,7 @@ class AsmEditor:
         cmds = Asm.parse(self.code_editor.contents)
         self.code_editor.highlighted_lines = [i for i, cmd in enumerate(cmds) if cmd is None]
         if len(self.code_editor.highlighted_lines) == 0:
-            self.left_buttons[-1].contents = [list("RUN ASM")]
+            self.left_buttons[-1].contents = [list("")]
         else:
             self.left_buttons[-1].contents = [list("FIX ERR")]
 
@@ -106,11 +106,14 @@ class AsmEditor:
             success = self.output == self.puzzle[3][test_case]
             if success:
                 if len(self.puzzle[3]) <= test_case + 1:
-                    total_steps += self.asm.pc
-                    win_editor = NanoEditor(self.term, (20, 6), (30, 4))
+                    total_steps += self.asm.pc + 1
+                    win_editor = NanoEditor(self.term, (30, 8), (32, 4))
                     win_editor.is_focused = False
-                    win_editor.contents = "YOUR CODE TOOK " + str(total_steps) + " STEPS"
-                    win_editor.contents = [list(win_editor.contents)]
+                    win_editor.contents = [
+                        "Your code took " + str(total_steps) + " steps, and",
+                        "passed all of the test cases.",
+                    ]
+                    win_editor.contents = [list(line) for line in win_editor.contents]
                     outline_editor(self.term, win_editor, title="SUCCESS!", color=self.term.black_on_green)
                     win_editor.draw()
                     with self.term.cbreak(), self.term.hidden_cursor():
@@ -120,9 +123,9 @@ class AsmEditor:
                     break
                 else:
                     # Reset and start again!
-                    test_case += 1
+                    test_case += 1 
                     self.asm.stack = self.puzzle[2][test_case].copy()
-                    total_steps += self.asm.pc
+                    total_steps += self.asm.pc + 1
                     self.asm.pc = 0
                     self.output = []
 
@@ -147,7 +150,7 @@ class AsmEditor:
         self.stack_editor.draw()
 
         outline_editor(
-            self.term, self.code_editor, title="ASSEMBLY CODE", color=outline_colors[self.cursor[0] == 0]
+            self.term, self.code_editor, title="DEEP ASSEMBLY", color=outline_colors[self.cursor[0] == 0]
         )
         self.code_editor.draw()
 
@@ -167,7 +170,12 @@ class AsmEditor:
             arrow_y = self.asm.pc + 1
         else:
             arrow_y = 1
-        print(self.term.move_xy(self.STACK_WIDTH + 3, arrow_y) + self.term.red_on_black("→"))
+        print(self.term.move_xy(self.STACK_WIDTH + 4, arrow_y) + self.term.red_on_black("→"))
+
+        # Line numbers
+        for y in range(self.CODE_HEIGHT):
+            if y + 1 != arrow_y:
+                print(self.term.move_xy(self.STACK_WIDTH + 3, y + 1) + self.term.white_on_black(str(y)))
 
     @property
     def _highlighted_editor(self):

@@ -50,7 +50,7 @@ class UCode:
 
                 # Check index numbers
                 if name[0] in ["c"]:
-                    if int(name[1:]) < 1 or 2 < int(name[1:]) :
+                    if int(name[1:]) not in [0, 1]:
                         ok = False
                         break
                 elif name[0] in ["u", "o", "a", "j"]:
@@ -88,7 +88,7 @@ class UCode:
         if bank == "u":
             return self.user_regs[index]
         elif bank == "c":
-            return bool(index)
+            return bool(index+1)
         elif bank == "i":
             return self.input_regs[index]
         elif bank == "o":

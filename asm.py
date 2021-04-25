@@ -1,3 +1,6 @@
+from uint import Uint6, UintN
+
+
 def cmd_add(asm):
     return asm.pipe1 + asm.pipe2, None
 
@@ -35,9 +38,33 @@ def cmd_swap(asm):
     asm.stack.append(first)
     return 0, None
 
+
 def cmd_output(asm):
     asm.output(asm.pipe1)
     return 0, None
+
+
+def run_ucode_as_cmd(asm, ucode):
+    input1 = Uint6(asm.pipe1).bits()
+    input2 = Uint6(asm.pipe2).bits()
+    addr = Uint6(asm.pc).bits()
+    _, output, jump = ucode.run(input1, input2, addr)
+    output = UintN.from_bits(output).number
+    jump = UintN.from_bits(jump).number
+    return output, jump
+
+
+def cmd_cust1(asm):
+    return run_ucode_as_cmd(asm, asm.ucodes[0])
+
+
+def cmd_cust2(asm):
+    return run_ucode_as_cmd(asm, asm.ucodes[1])
+
+
+def cmd_cust3(asm):
+    return run_ucode_as_cmd(asm, asm.ucodes[2])
+
 
 commands = {
     "add": cmd_add,
@@ -48,6 +75,9 @@ commands = {
     "pop": cmd_pop,
     "swap": cmd_swap,
     "output": cmd_output,
+    "cust1": cmd_cust1,
+    "cust2": cmd_cust2,
+    "cust3": cmd_cust3,
 }
 
 

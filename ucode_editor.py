@@ -1,4 +1,4 @@
-from nano_editor import NanoEditor, outline_editor
+from nano_editor import NanoEditor, outline_editor, chars_to_bools, bools_to_chars
 from ucode import UCode
 
 class UcodeEditor:

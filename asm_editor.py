@@ -1,15 +1,6 @@
 from asm import Asm
-from nano_editor import NanoEditor, outline_editor
+from nano_editor import NanoEditor, outline_editor, chars_to_bools, bools_to_chars
 from ucode_editor import UcodeEditor
-
-
-def chars_to_bools(chars):
-    assert all([c == "0" or c == "1" for c in chars])
-    return [c == "1" for c in chars]
-
-def bools_to_chars(bools):
-    return ["1" if b else "0" for b in bools]
-
 
 class AsmEditor:
     def __init__(self, term, esc_delay, puzzle):

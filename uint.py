@@ -19,6 +19,13 @@ class UintN:
     def __add__(self, other):
         return (self.number + other.number) % 2 ** self.n
 
+    @classmethod
+    def from_bits(cls, bits):
+        n = len(bits)
+        number = sum([(2**(n-1-i)) * bits[i] for i in range(n)])
+        return cls(number, n)
+
+
 
 class Uint6(UintN):
     def __init__(self, number):

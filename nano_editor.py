@@ -1,3 +1,12 @@
+def chars_to_bools(chars):
+    assert all([c == "0" or c == "1" for c in chars])
+    return [c == "1" for c in chars]
+
+
+def bools_to_chars(bools):
+    return ["1" if b else "0" for b in bools]
+
+
 def draw_outline(term, start_coords, end_coords, title=None, color=None):
     if color == None:
         color = term.green_on_black
@@ -26,6 +35,7 @@ def outline_editor(term, editor, title, color=None):
         title=title,
         color=color,
     )
+
 
 class NanoEditor:
     def __init__(self, term, origin, size, contents=None):
@@ -124,4 +134,3 @@ class NanoEditor:
 
         self.edit_callback()
         self.draw()
-

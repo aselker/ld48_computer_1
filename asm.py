@@ -2,8 +2,19 @@ def cmd_add(asm):
     return asm.pipe1 + asm.pipe2, None
 
 
+def cmd_sub(asm):
+    return asm.pipe1 - asm.pipe2, None
+
+
 def cmd_jmp(asm):
     return 0, asm.pipe1
+
+
+def cmd_jmpzero(asm):
+    if asm.pipe1 == 0:
+        return 0, asm.pipe2
+    else:
+        return 0, None
 
 
 def cmd_push(asm):
@@ -13,15 +24,30 @@ def cmd_push(asm):
 
 def cmd_pop(asm):
     if len(asm.stack) == 0:
-        return 0, none
+        return 0, None
     return asm.stack.pop(), None
 
 
+def cmd_swap(asm):
+    first = cmd_pop(asm)
+    second = cmd_pop(asm)
+    asm.stack.append(second)
+    asm.stack.append(first)
+    return 0, None
+
+def cmd_output(asm):
+    asm.output(asm.pipe1)
+    return 0, None
+
 commands = {
     "add": cmd_add,
+    "sub": cmd_sub,
     "jmp": cmd_jmp,
+    "jmpzero": cmd_jmpzero,
     "push": cmd_push,
     "pop": cmd_pop,
+    "swap": cmd_swap,
+    "output": cmd_output,
 }
 
 
@@ -94,6 +120,9 @@ class Asm:
         self.stack = []
         self.pc = 0
 
+    def output(self, val):
+        self.output_callback(self, val)
+
     def step(self):
         cmd = self.cmds[self.pc]
         self.pipe1 = 0
@@ -122,7 +151,6 @@ class Asm:
 
         self.pc = next_pc
         return True
-
 
     def run(self):
         while self.step():

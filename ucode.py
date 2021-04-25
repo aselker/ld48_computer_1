@@ -1,14 +1,19 @@
 from uint import UintN
 
 ucode_ref_sheet = """Commands:
-buf (1 arg): Return arg unmodified
-not (1 arg): Invert arg
-and (2 arg): 1 only if both args are 1
-nand(2 arg): Inverted and
-or  (2 arg): 1 if either arg is 1
-nor (2 arg): Inverted or
-xor (2 arg): 1 if exactly one arg is 1
-xnor (2 arg): Inverted xor"""
+BUF  (1 arg): Return arg unmodified
+NOT  (1 arg): Invert arg
+AND  (2 arg): 1 only if both args are 1
+NAND (2 arg): Inverted and
+OR   (2 arg): 1 if either arg is 1
+NOR  (2 arg): Inverted or
+XOR  (2 arg): 1 if exactly one arg is 1
+XNOR (2 arg): Inverted xor
+
+Example:
+    U1 = BUF I10
+    U2 = XOR I3 I4
+    O1 = IF U1 U2 I1"""
 
 
 class UCode:

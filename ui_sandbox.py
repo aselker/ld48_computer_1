@@ -55,9 +55,7 @@ class OverviewScreen:
 class NanoEditor:
     """
     TODO:
-        * Backspace, delete
         * Insert in middle of line?
-        * Return
     """
 
     def __init__(self, term, origin, size, contents=None):
@@ -91,7 +89,8 @@ class NanoEditor:
                 self.term.white_on_black if (y not in self.highlighted_lines) else self.term.black_on_red
             )
             cursor_color = (
-                self.term.black_on_white if (y not in self.highlighted_lines) else self.term.black_on_white
+                # self.term.black_on_green if (y not in self.highlighted_lines) else self.term.black_on_white
+                self.term.black_on_green
             )
 
             if self.cursor[1] == y and self.is_focused:
@@ -132,12 +131,12 @@ class NanoEditor:
                 self.cursor[0] = min(self.cursor[0], len(self.contents[self.cursor[1]]))
         elif inp.code == self.term.KEY_BACKSPACE:
             if 0 < self.cursor[0]:
-                del(self.contents[self.cursor[1]][self.cursor[0]-1])
+                del self.contents[self.cursor[1]][self.cursor[0] - 1]
                 self.cursor[0] -= 1
         elif inp.code == self.term.KEY_ENTER:
             if self.contents[-1] == [] and self.cursor[1] < self.size[1] - 1:
                 self.contents.pop()
-                self.contents.insert(self.cursor[1]+1, [])
+                self.contents.insert(self.cursor[1] + 1, [])
                 self.cursor[0] = 0
                 self.cursor[1] += 1
         elif inp.upper() in self.legal_chars:
@@ -153,10 +152,10 @@ class NanoEditor:
         self.draw()
 
 
-def draw_outline(term, start_coords, end_coords, is_highlighted, title=None, color=None):
+def draw_outline(term, start_coords, end_coords, title=None, color=None):
     # "─│┌┐└┘"
     if color == None:
-        color = term.black_on_green if is_highlighted else term.green_on_black
+        color = term.green_on_black
     print(
         term.move_xy(start_coords[0], start_coords[1])
         + color("┌" + "─" * (end_coords[0] - start_coords[0] - 1) + "┐")
@@ -199,13 +198,12 @@ class UcodeEditor:
         self.cursor = [0, 0]
         self.is_editing = False
 
-    def _outline_editor(self, editor, title, is_highlighted, color=None):
+    def _outline_editor(self, editor, title, color=None):
 
         draw_outline(
             term,
             (editor.origin[0] - 1, editor.origin[1] - 1,),
             (editor.origin[0] + editor.size[0], editor.origin[1] + editor.size[1],),
-            is_highlighted=is_highlighted,
             title=title,
             color=color,
         )
@@ -236,7 +234,12 @@ class UcodeEditor:
 
     def draw(self):
 
-        self._outline_editor(self.code_editor, title="MICROCODE", is_highlighted=(self.cursor[0] == 0))
+        if self.is_editing:
+            outline_color = self.term.black_on_white if (self.cursor[0] == 0) else self.term.white_on_black
+        else:
+            outline_color = self.term.black_on_green if (self.cursor[0] == 0) else self.term.green_on_black
+        self._outline_editor(self.code_editor, title="MICROCODE", color=outline_color)
+
         self.code_editor.draw()
 
         for i, editor, title in zip(
@@ -244,12 +247,15 @@ class UcodeEditor:
             self.reg_editors,
             ["INPUT1", "INPUT2", "ADDR", "USER", "OUTPUT", "JUMP",],
         ):
-            self._outline_editor(
-                editor,
-                title=title,
-                is_highlighted=(self.cursor == [1, i]),
-                color=term.white_on_black if i in [3, 4, 5] else None,
-            )
+            if self.is_editing or i in [3, 4, 5]:
+                outline_color = (
+                    self.term.black_on_white if (self.cursor == [1, i]) else self.term.white_on_black
+                )
+            else:
+                outline_color = (
+                    self.term.black_on_green if (self.cursor == [1, i]) else self.term.green_on_black
+                )
+            self._outline_editor(editor, title=title, color=outline_color)
             editor.draw()
 
     @property

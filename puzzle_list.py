@@ -15,7 +15,7 @@ puzzles = [
         "SUM",
         "Sum together sets of inputs terminated by\n0s, output the sums",
         [[0, 4, 6, 2, 0, 5, 9, 0, 1], [0, 19, 17, 20, 0, 13, 3, 8, 6, 0, 14, 0, 4]],
-        [[12, 14, 1], [56, 30, 14, 4]],
+        [[1, 14, 12], [4, 14, 30, 56]],
     ],
     [
         "MOD 8",
@@ -69,7 +69,7 @@ class PuzzleList:
     def draw(self):
         print(self.term.clear)
 
-        is_highlighted = self.cursor[1]==0
+        is_highlighted = self.cursor[1] == 0
         outline_color = self.term.black_on_green if is_highlighted else self.term.green_on_black
         # outline_color = self.term.white_on_black
         outline_editor(self.term, self.info_button, "DEEPER BROS. (R) DIGITAL COMPUTER v0.23", outline_color)
@@ -77,7 +77,7 @@ class PuzzleList:
 
         for i, button in enumerate(self.puzzle_buttons):
             title = "PROGRAM " + str(i + 1)
-            is_highlighted = (self.cursor[1] * 3) + self.cursor[0] == i+3
+            is_highlighted = (self.cursor[1] * 3) + self.cursor[0] == i + 3
             outline_color = self.term.black_on_green if is_highlighted else self.term.green_on_black
             outline_editor(self.term, button, title, color=outline_color)
             button.draw()
@@ -88,7 +88,9 @@ class PuzzleList:
             if self.cursor[1] == 0:
                 self.is_editing = self.info_screen.keypress(inp)
             else:
-                self.is_editing = self.asm_sub_editors[(self.cursor[1] * 3) + self.cursor[0] - 3].keypress(inp)
+                self.is_editing = self.asm_sub_editors[(self.cursor[1] * 3) + self.cursor[0] - 3].keypress(
+                    inp
+                )
             do_draw = not self.is_editing
         else:
             if inp.code == self.term.KEY_ESCAPE:

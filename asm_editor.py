@@ -9,7 +9,7 @@ class AsmEditor:
         self.esc_delay = esc_delay
         self.puzzle = puzzle
 
-        self.CODE_WIDTH = 32
+        self.CODE_WIDTH = 42
         self.CODE_HEIGHT = 32
         self.STACK_WIDTH = 9
         self.STACK_HEIGHT = 32
@@ -106,7 +106,6 @@ class AsmEditor:
             success = self.output == self.puzzle[3][test_case]
             if success:
                 if len(self.puzzle[3]) <= test_case + 1:
-                    total_steps += self.asm.pc + 1
                     win_editor = NanoEditor(self.term, (30, 8), (32, 4))
                     win_editor.is_focused = False
                     win_editor.contents = [
@@ -125,7 +124,6 @@ class AsmEditor:
                     # Reset and start again!
                     test_case += 1 
                     self.asm.stack = self.puzzle[2][test_case].copy()
-                    total_steps += self.asm.pc + 1
                     self.asm.pc = 0
                     self.output = []
 
@@ -136,6 +134,7 @@ class AsmEditor:
                 self.draw()
                 break
 
+            total_steps += 1
             self.draw()
 
     def draw(self):

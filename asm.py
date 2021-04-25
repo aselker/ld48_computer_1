@@ -1,10 +1,12 @@
 from uint import Uint6, UintN
 
-asm_ref_sheet="""Commands:
+asm_ref_sheet = """Commands:
 ADD:     return sum of inputs
 SUB:     return difference of inputs
+FIRST:   return the first input
+SEDOND:  return the second input
 JMP:     jump to line no. by first input
-JMPZERO: jmp, if second input is 0
+JMPZERO: JMP, if second input is 0
 PUSH:    push first input onto stack
 POP:     remove top of stack, return it
 SWAP:    swap top two stack entries
@@ -15,9 +17,10 @@ CUST3:   run third custom assembly cmd
 
 Example:
 POP 1 | ADD | PUSH
-4 POP | PUSH JMPZERO
+4 POP|PUSH JMPZERO
 OUTPUT
-0 | JMP"""
+16|JMP"""
+
 
 def cmd_add(asm):
     return asm.pipe1 + asm.pipe2, None
@@ -25,6 +28,14 @@ def cmd_add(asm):
 
 def cmd_sub(asm):
     return asm.pipe1 - asm.pipe2, None
+
+
+def cmd_first(asm):
+    return asm.pipe1, None
+
+
+def cmd_second(asm):
+    return asm.pipe2, None
 
 
 def cmd_jmp(asm):
@@ -50,10 +61,17 @@ def cmd_pop(asm):
 
 
 def cmd_swap(asm):
-    first = cmd_pop(asm)
-    second = cmd_pop(asm)
-    asm.stack.append(second)
+    if len(asm.stack) == 0:
+        first = 0
+    else:
+        first = asm.stack.pop()
+
+    if len(asm.stack) == 0:
+        second = 0
+    else:
+        second = asm.stack.pop()
     asm.stack.append(first)
+    asm.stack.append(second)
     return 0, None
 
 
@@ -73,20 +91,25 @@ def run_ucode_as_cmd(asm, ucode):
 
 
 def cmd_cust1(asm):
-    return run_ucode_as_cmd(asm, asm.ucodes[0])
+    output, jump = run_ucode_as_cmd(asm, asm.ucodes[0])
+    return output, jump
 
 
 def cmd_cust2(asm):
-    return run_ucode_as_cmd(asm, asm.ucodes[1])
+    output, jump = run_ucode_as_cmd(asm, asm.ucodes[1])
+    return output, jump
 
 
 def cmd_cust3(asm):
-    return run_ucode_as_cmd(asm, asm.ucodes[2])
+    output, jump = run_ucode_as_cmd(asm, asm.ucodes[2])
+    return output, jump
 
 
 commands = {
     "add": cmd_add,
     "sub": cmd_sub,
+    "first": cmd_first,
+    "second": cmd_second,
     "jmp": cmd_jmp,
     "jmpzero": cmd_jmpzero,
     "push": cmd_push,

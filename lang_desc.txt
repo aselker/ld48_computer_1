@@ -2,20 +2,24 @@ Thank you for purchasing DEEPER BROS. (R) DIGITAL COMPUTER v0.23!  Your new comp
 
 The DEEPER BROS. (R) DIGITAL COMPUTER v0.23 is programmed using two languages: Deep Assembly language, and Deeper Microcode.  Programs are written in Deep Assembly, and Deeper Microcode is used to create custom Deep Assembly commands.
 
+NOTE: Programming the DEEPER BROS. (R) DIGITAL COMPUTER v0.23 is not for the faint of heart.
+
 DEEP ASSEMBLY
 Each line of Deep Assembly consists of commands or pairs of commands, separated by pipe characters (|).  This is an example program:
 
     POP 1 | ADD | PUSH
-    4 POP | PUSH JMPZERO
+    4 POP|PUSH JMPZERO
     OUTPUT
-    0 | JMP
+    16|JMP
 
 The fundamental data type of Deep Assembly is the 6-bit integer, representing any number from 0 to 63.  If a command would result in a number outside that range, such as "32 32 | ADD", the number wraps to the range of 0-63.  Each command recieves two such numbers as inputs.  If the command is before the first | on the line, then its inputs are 0.  Otherwise, its inputs are the outputs of the commands before the last |.  If there was only one command before the last |, then the second input is set to 0.  The following is a list of commands:
 
     ADD:     return sum of inputs
     SUB:     return difference of inputs
+    FIRST:   return the first input
+    SEDOND:  return the second input
     JMP:     jump to line no. by first input
-    JMPZERO: jmp, if second input is 0
+    JMPZERO: JMP, if second input is 0
     PUSH:    push first input onto stack
     POP:     remove top of stack, return it
     SWAP:    swap top two stack entries

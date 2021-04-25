@@ -1,3 +1,5 @@
+from uint import UintN
+
 ucode_ref_sheet = """Commands:
 buf (1 arg): Return arg unmodified
 not (1 arg): Invert arg
@@ -150,6 +152,10 @@ class UCode:
         assert len(input1) == 6 and len(input2) == 6
         self.input_regs = input1 + input2
         self.addr_regs = addr
+
+        # By default, continue to next line
+        self.jump_regs = (UintN.from_bits(addr) + UintN(1,6)).bits()
+
 
         for inst in self.insts:
             self.run_single_instruction(inst)

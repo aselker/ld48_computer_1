@@ -17,7 +17,7 @@ class UintN:
         return bits
 
     def __add__(self, other):
-        return (self.number + other.number) % 2 ** self.n
+        return UintN((self.number + other.number) % 2 ** self.n, self.n)
 
     @classmethod
     def from_bits(cls, bits):

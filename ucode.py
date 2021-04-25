@@ -6,6 +6,8 @@ class UCode:
             if type(line) is list:
                 line = "".join(line)
 
+            line = line.rstrip()
+
             # Blank line -> blank instruction
             if line == "":
                 insts.append([])
@@ -36,11 +38,17 @@ class UCode:
 
             # Check reg names
             ok = True
-            for name in [words[0]] + words[2:]:
+            for i, name in enumerate([words[0]] + words[2:]):
                 if len(name) < 2 or 3 < len(name) or not name[1:].isdigit():
                     ok = False
                     break
 
+                # Can't write to input regs
+                if i==0 and name[0] in ["c", "i", "a"]:
+                    ok = False
+                    break
+
+                # Check index numbers
                 if name[0] in ["c"]:
                     if int(name[1:]) < 1 or 2 < int(name[1:]) :
                         ok = False
@@ -62,20 +70,21 @@ class UCode:
                 insts.append(None)
                 continue
 
+
         return insts
 
 
 
     def __init__(self, insts):
+        self.insts = insts
         self.user_regs = [False] * 6
-        self.output_regs = [False] * 12
+        self.output_regs = [False] * 6
         self.jump_regs = [False] * 6
 
-        self.insts = insts
 
     def get_reg(self, name):
         bank = name[0]
-        index = int(name[1]) - 1
+        index = int(name[1:]) - 1
         if bank == "u":
             return self.user_regs[index]
         elif bank == "c":
@@ -91,7 +100,7 @@ class UCode:
 
     def set_reg(self, name, value):
         bank = name[0]
-        index = int(name[1]) - 1
+        index = int(name[1:]) - 1
         if bank == "u":
             self.user_regs[index] = value
         elif bank == "c":

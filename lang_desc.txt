@@ -17,7 +17,7 @@ The fundamental data type of Deep Assembly is the 6-bit integer, representing an
     ADD:     return sum of inputs
     SUB:     return difference of inputs
     FIRST:   return the first input
-    SEDOND:  return the second input
+    SECOND:  return the second input
     JMP:     jump to line no. by first input
     JMPZERO: JMP, if second input is 0
     PUSH:    push first input onto stack
@@ -31,7 +31,7 @@ The fundamental data type of Deep Assembly is the 6-bit integer, representing an
 Normally, after every line executes, execution continues to the next line.  A JMP or JMPZERO command will redirect execution.  PUSH, POP, and SWAP all interact with the Stack, which can be used to store and recover numbers.  The input to the program is also fed in via the Stack.  OUTPUT appends to the write-only Output list.  CUST1, 2, and 3 are custom, user-editable Deep Assembly commands written in Deeper Microcode.  The program finishes when execution continues after the last line of code, or immediately if the Output is correct.
 
 DEEPER MICROCODE
-Deeper Microcode is a simple language, with no flow control.  The fundamental data type of Deeper Microcode is the bit; input and output is in the form of registers that represent numbers, but Deeper Microcode only works with single bits.  Each line is a single command.  This is an example program:
+Deeper Microcode is a simple language, with no flow control.  The fundamental data type of Deeper Microcode is the bit; input and output is in the form of registers that represent numbers, but Deeper Microcode only works with single bits.  For example, the number 3 is equivalent to the bits 000011.  Each line is a single command.  This is an example program:
 
     U1 = BUF I10
     U2 = XOR I3 I4

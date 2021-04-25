@@ -141,8 +141,11 @@ class NanoEditor:
         elif inp.upper() in self.legal_chars:
             if len(self.contents[self.cursor[1]]) < self.size[0]:
                 self.contents[self.cursor[1]].insert(self.cursor[0], inp.upper())
-                if self.cursor[0] < self.size[0] - 1:
-                    self.cursor[0] += 1
+            else:
+                self.contents[self.cursor[1]][self.cursor[0]] = inp.upper()
+
+            if self.cursor[0] < self.size[0] - 1:
+                self.cursor[0] += 1
 
         self.edit_callback()
         self.draw()

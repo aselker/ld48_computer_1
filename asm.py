@@ -1,15 +1,16 @@
 from uint import Uint6, UintN
 
 asm_ref_sheet = """Commands:
+FIRST:   return the first input
+SECOND:  return the second input
 ADD:     return sum of inputs
 SUB:     return difference of inputs
-FIRST:   return the first input
-SEDOND:  return the second input
 JMP:     jump to line no. by first input
 JMPZERO: JMP, if second input is 0
 PUSH:    push first input onto stack
 POP:     remove top of stack, return it
 SWAP:    swap top two stack entries
+APPEND:  add first input after stack
 OUTPUT:  send first input to OUTPUT
 CUST1:   run first custom assembly cmd
 CUST2:   run second custom assembly cmd
@@ -39,19 +40,19 @@ def cmd_second(asm):
 
 
 def cmd_jmp(asm):
-    return 0, asm.pipe1
+    return asm.pipe1, asm.pipe1
 
 
 def cmd_jmpzero(asm):
     if asm.pipe2 == 0:
-        return 0, asm.pipe1
+        return asm.pipe1, asm.pipe1
     else:
-        return 0, None
+        return asm.pipe1, None
 
 
 def cmd_push(asm):
     asm.stack.append(asm.pipe1)
-    return 0, None
+    return asm.pipe1, None
 
 
 def cmd_pop(asm):
@@ -72,12 +73,15 @@ def cmd_swap(asm):
         second = asm.stack.pop()
     asm.stack.append(first)
     asm.stack.append(second)
-    return 0, None
+    return asm.pipe1, None
 
+def cmd_append(asm):
+    asm.stack.insert(0, asm.pipe1)
+    return asm.pipe1, None
 
 def cmd_output(asm):
     asm.output(asm.pipe1)
-    return 0, None
+    return asm.pipe1, None
 
 
 def run_ucode_as_cmd(asm, ucode):
@@ -115,6 +119,7 @@ commands = {
     "push": cmd_push,
     "pop": cmd_pop,
     "swap": cmd_swap,
+    "append": cmd_append,
     "output": cmd_output,
     "cust1": cmd_cust1,
     "cust2": cmd_cust2,

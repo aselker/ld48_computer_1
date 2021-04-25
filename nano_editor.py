@@ -62,7 +62,14 @@ class NanoEditor:
         pass
 
     def draw(self):
-        for y, line in enumerate(self.contents):
+        if len(self.contents) < self.size[1]:
+            contents = self.contents + [[]]*(self.size[1]-len(self.contents) )
+        elif len(self.contents) > self.size[1]:
+            contents = self.contents[:self.size[1]]
+        else:
+            contents = self.contents
+
+        for y, line in enumerate(contents):
             line = "".join(line)
 
             line_color = (

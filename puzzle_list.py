@@ -3,14 +3,38 @@ from asm_editor import AsmEditor
 
 # A puzzle is a list of [title, description, inputs, outputs]
 puzzles = [
-    ["COUNT TO 10", "Put numbers from 1 to 10 into the output", [[]], [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]],],
+    ["COUNT TO 10", "Output numbers from 1 to 10 in order", [[]], [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]],],
+    [
+        "POWER OF 2",
+        "For each input, output the nth power of 2",
+        [[5, 4, 3, 2, 1, 0], [3, 1, 4, 5, 2, 3, 5, 0]],
+        [[1, 2, 4, 8, 16, 32], [8, 2, 16, 32, 4, 8, 32, 1]],
+    ],
+    [
+        "SUM",
+        "Sum together sets of inputs terminated by 0s, output the sums",
+        [[0, 4, 6, 2, 0, 5, 9, 0, 1], [0, 19, 17, 20, 0, 13, 3, 8, 6, 0, 14, 0, 4]],
+        [[12, 14, 1], [56, 30, 14, 4]],
+    ],
+    [
+        "MOD 8",
+        "For each input, output its remainder when divided by 8",
+        [[0, 1, 2, 4, 8, 12, 15], [43, 53, 2, 4, 1, 39, 28]],
+        [[7, 4, 0, 4, 2, 1, 0], [3, 5, 2, 4, 1, 7, 4]],
+    ],
     [
         "SQUARE",
-        "Square the incoming numbers",
-        [[1, 2, 3, 4, 5, 6, 7], [2, 5, 3, 1, 4]],
+        "For each input, output its square",
+        [[7, 6, 5, 4, 3, 2, 1], [4, 1, 3, 5, 2]],
         [[1, 4, 9, 16, 25, 36, 49], [4, 25, 9, 1, 16]],
     ],
-] * 3
+    [
+        "SORT",
+        "Given exactly 10 unique inputs, output them sorted",
+        [[3, 1, 4, 5, 9, 2, 6, 8, 7, 0], [39, 48, 0, 63, 29, 23, 47, 8, 25, 61]],
+        [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [0, 8, 23, 25, 29, 39, 47, 48, 61, 63]],
+    ],
+]
 
 
 class PuzzleList:

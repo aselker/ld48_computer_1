@@ -55,9 +55,9 @@ class OverviewScreen:
 term = Terminal()
 esc_delay = 0.05
 
-while term.width < 120:
+while term.width < 100:
     print(term.home + term.clear)
-    print(term.white_on_black("Please resize terminal to at least 120 columns."))
+    print(term.white_on_black("Please resize terminal to at least 100 columns."))
     _ = term.inkey(timeout=0.1)  # Probably better way to do this?
 while term.height < 40:
     print(term.home + term.clear)

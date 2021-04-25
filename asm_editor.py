@@ -2,6 +2,7 @@ from asm import Asm
 from nano_editor import NanoEditor, outline_editor, chars_to_bools, bools_to_chars
 from ucode_editor import UcodeEditor
 
+
 class AsmEditor:
     def __init__(self, term, esc_delay, puzzle):
         self.term = term
@@ -9,12 +10,17 @@ class AsmEditor:
         self.puzzle = puzzle
 
         self.CODE_WIDTH = 32
-        self.CODE_HEIGHT = 24
+        self.CODE_HEIGHT = 32
         self.STACK_WIDTH = 9
         self.STACK_HEIGHT = 32
 
         self.stack_editor = NanoEditor(term, (1, 1), (self.STACK_WIDTH, self.STACK_HEIGHT))
         self.stack_editor.is_focused = False
+
+        # Fill the stack
+        self.asm = Asm(Asm.parse([]), [], self.CODE_HEIGHT)
+        self.asm.stack = self.puzzle[2][0].copy()
+        self._fill_stack_editor()
 
         self.code_editor = NanoEditor(term, (self.STACK_WIDTH + 5, 1), (self.CODE_WIDTH, self.CODE_HEIGHT))
         self.code_editor.edit_callback = self._parse
@@ -55,6 +61,11 @@ class AsmEditor:
     def _num_to_dec_bin(self, val):
         return f"{val:>02} {val:>06b}"
 
+    def _fill_stack_editor(self):
+        self.stack_editor.contents = [list(self._num_to_dec_bin(val)) for val in self.asm.stack]
+        self.stack_editor.contents.reverse()
+        # self.stack_editor.contents = self.stack_editor.contents + [[]] * ( self.stack_editor.size[1] - len(self.asm.stack))
+
     def _begin_execution(self):
         if len(self.code_editor.highlighted_lines) != 0:
             return
@@ -67,7 +78,7 @@ class AsmEditor:
         self.asm = Asm(Asm.parse(self.code_editor.contents), ucodes, self.CODE_HEIGHT)
         self.asm.output_callback = output_callback
 
-
+        total_steps = 0
         test_case = 0
         self.asm.stack = self.puzzle[2][test_case].copy()
         self.output = []
@@ -81,19 +92,30 @@ class AsmEditor:
                 break
 
             self.asm.step()
-            self.stack_editor.contents = [list(self._num_to_dec_bin(val)) for val in self.asm.stack]
-            self.stack_editor.contents.reverse()
+            self._fill_stack_editor()
 
             # Check for success, even when the prog is not in the process of finishing, beucase that way the
             # machine doesn't have to know when to stop.
             success = self.output == self.puzzle[3][test_case]
             if success:
                 if len(self.puzzle[3]) <= test_case + 1:
-                    raise NotImplementedError("A winner is you")
+                    total_steps += self.asm.pc
+                    win_editor = NanoEditor(self.term, (20, 6), (30, 4))
+                    win_editor.is_focused = False
+                    win_editor.contents = "YOUR CODE TOOK " + str(total_steps) + " STEPS"
+                    win_editor.contents = [list(win_editor.contents)]
+                    outline_editor(self.term, win_editor, title="SUCCESS!", color=self.term.black_on_green)
+                    win_editor.draw()
+                    with self.term.cbreak(), self.term.hidden_cursor():
+                        _ = self.term.inkey(esc_delay=self.esc_delay)
+                    self.is_executing = False
+                    self.draw()
+                    break
                 else:
                     # Reset and start again!
                     test_case += 1
                     self.asm.stack = self.puzzle[2][test_case].copy()
+                    total_steps += self.asm.pc
                     self.asm.pc = 0
                     self.output = []
 

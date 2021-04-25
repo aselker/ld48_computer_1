@@ -19,7 +19,7 @@ class UcodeEditor:
             editor.edit_callback = self._evaluate
             editor.is_focused = False
 
-            editor.contents = [list("000000")]
+            editor.contents = [list("000000")] if i<5 else [list("000001")]
 
             self.reg_editors[i] = editor
 

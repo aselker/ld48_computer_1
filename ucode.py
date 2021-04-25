@@ -151,10 +151,10 @@ class UCode:
     def run(self, input1, input2, addr):
         assert len(input1) == 6 and len(input2) == 6
         self.input_regs = input1 + input2
-        self.addr_regs = addr
+        self.addr_regs = addr.copy()
 
         # By default, continue to next line
-        self.jump_regs = (UintN.from_bits(addr) + UintN(1,6)).bits()
+        self.jump_regs = (UintN.from_bits(addr.copy()) + UintN(1,6)).bits()
 
 
         for inst in self.insts:

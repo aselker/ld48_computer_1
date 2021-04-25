@@ -1,6 +1,6 @@
 def chars_to_bools(chars):
-    assert all([c == "0" or c == "1" for c in chars])
-    return [c == "1" for c in chars]
+    # assert all([c == "0" or c == "1" for c in chars])
+    return [c == "1" for c in chars] + [False]* (6-len(chars))
 
 
 def bools_to_chars(bools):

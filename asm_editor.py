@@ -1,4 +1,4 @@
-from asm import Asm
+from asm import Asm, asm_ref_sheet
 from nano_editor import NanoEditor, outline_editor, chars_to_bools, bools_to_chars
 from ucode_editor import UcodeEditor
 
@@ -30,6 +30,13 @@ class AsmEditor:
             term, (self.STACK_WIDTH + self.CODE_WIDTH + 18, 1), (self.STACK_WIDTH, self.STACK_HEIGHT)
         )
         self.output_editor.is_focused = False
+
+        self.info_editor = NanoEditor(
+                term, (self.STACK_WIDTH*2 + self.CODE_WIDTH + 21, 1), (41, self.STACK_HEIGHT)
+                )
+        self.info_editor.is_focused = False
+        info = ["Goal:", self.puzzle[1], ""] + asm_ref_sheet.split("\n")
+        self.info_editor.contents = [list(line) for line in info]
 
         # Ucode editor buttons, and RUN button
         self.left_buttons = []
@@ -147,8 +154,11 @@ class AsmEditor:
         outline_editor(self.term, self.output_editor, title="OUTPUT", color=self.term.white_on_black)
         self.output_editor.draw()
 
+        outline_editor(self.term, self.info_editor, title="INFO", color=self.term.white_on_black)
+        self.info_editor.draw()
+
         for i, button in enumerate(self.left_buttons):
-            title = ["CUSTOM1", "CUSTOM2", "CUSTOM3", "EXECUTE"][i]
+            title = ["CUST1", "CUST2", "CUST3", "EXECUTE"][i]
             outline_editor(self.term, button, title=title, color=outline_colors[self.cursor == [1, i]])
             button.draw()
 

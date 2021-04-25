@@ -1,5 +1,5 @@
 from nano_editor import NanoEditor, outline_editor, chars_to_bools, bools_to_chars
-from ucode import UCode
+from ucode import UCode, ucode_ref_sheet
 
 class UcodeEditor:
     def __init__(self, term):
@@ -22,6 +22,14 @@ class UcodeEditor:
             editor.contents = [list("000000")]
 
             self.reg_editors[i] = editor
+
+        self.info_editor = NanoEditor(
+                term, (CODE_WIDTH + 13, 1), (39, 32)
+                )
+        self.info_editor.is_focused = False
+        info = ucode_ref_sheet.split("\n")
+        self.info_editor.contents = [list(line) for line in info]
+
 
         self.ucode = UCode([])
         self.cursor = [0, 0]
@@ -54,8 +62,10 @@ class UcodeEditor:
         else:
             outline_color = self.term.black_on_green if (self.cursor[0] == 0) else self.term.green_on_black
         outline_editor(self.term, self.code_editor, title="MICROCODE", color=outline_color)
-
         self.code_editor.draw()
+
+        outline_editor(self.term, self.info_editor, title="INFO", color=self.term.white_on_black)
+        self.info_editor.draw()
 
         for i, editor, title in zip(
             range(len(self.reg_editors)),

@@ -121,7 +121,12 @@ class NanoEditor:
                 self.cursor[1] += 1
                 self.cursor[0] = min(self.cursor[0], len(self.contents[self.cursor[1]]))
         elif inp.code == self.term.KEY_BACKSPACE:
-            if 0 < self.cursor[0]:
+            if 0 == self.cursor[0]:
+                if 0 < self.cursor[1] and self.contents[self.cursor[1] - 1] == []:
+                    del self.contents[self.cursor[1] - 1]
+                    self.contents.append([])
+                    self.cursor[1] -= 1
+            else:
                 del self.contents[self.cursor[1]][self.cursor[0] - 1]
                 self.cursor[0] -= 1
         elif inp.code == self.term.KEY_DELETE:

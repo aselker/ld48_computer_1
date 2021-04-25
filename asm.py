@@ -1,5 +1,17 @@
 from uint import Uint6, UintN
 
+asm_ref_sheet="""Commands:
+add:     return sum of inputs
+sub:     return difference of inputs
+jmp:     jump to line no. by first input
+jmpzero: jmp, if second input is 0
+push:    push first input onto stack
+pop:     remove top of stack, return it
+swap:    swap top two stack entries
+output:  send first input to OUTPUT
+cust1:   run first custom assembly cmd
+cust2:   run second custom assembly cmd
+cust3:   run third custom assembly cmd"""
 
 def cmd_add(asm):
     return asm.pipe1 + asm.pipe2, None
@@ -14,8 +26,8 @@ def cmd_jmp(asm):
 
 
 def cmd_jmpzero(asm):
-    if asm.pipe1 == 0:
-        return 0, asm.pipe2
+    if asm.pipe2 == 0:
+        return 0, asm.pipe1
     else:
         return 0, None
 

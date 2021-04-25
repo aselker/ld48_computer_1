@@ -1,3 +1,14 @@
+ucode_ref_sheet = """Commands:
+buf (1 arg): Return arg unmodified
+not (1 arg): Invert arg
+and (2 arg): 1 only if both args are 1
+nand(2 arg): Inverted and
+or  (2 arg): 1 if either arg is 1
+nor (2 arg): Inverted or
+xor (2 arg): 1 if exactly one arg is 1
+xnor (2 arg): Inverted xor"""
+
+
 class UCode:
     @classmethod
     def parse(cls, lines):

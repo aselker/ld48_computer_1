@@ -130,6 +130,16 @@ class NanoEditor:
             if self.cursor[1] < self.size[1] - 1:
                 self.cursor[1] += 1
                 self.cursor[0] = min(self.cursor[0], len(self.contents[self.cursor[1]]))
+        elif inp.code == self.term.KEY_BACKSPACE:
+            if 0 < self.cursor[0]:
+                del(self.contents[self.cursor[1]][self.cursor[0]-1])
+                self.cursor[0] -= 1
+        elif inp.code == self.term.KEY_ENTER:
+            if self.contents[-1] == [] and self.cursor[1] < self.size[1] - 1:
+                self.contents.pop()
+                self.contents.insert(self.cursor[1]+1, [])
+                self.cursor[0] = 0
+                self.cursor[1] += 1
         elif inp.upper() in self.legal_chars:
             if self.cursor[0] < self.size[0]:
 
@@ -139,14 +149,14 @@ class NanoEditor:
                 if self.cursor[0] < self.size[0] - 1:
                     self.cursor[0] += 1
 
-                self.edit_callback()
-
+        self.edit_callback()
         self.draw()
 
 
-def draw_outline(term, start_coords, end_coords, is_highlighted, title=None):
+def draw_outline(term, start_coords, end_coords, is_highlighted, title=None, color=None):
     # "─│┌┐└┘"
-    color = term.black_on_green if is_highlighted else term.green_on_black
+    if color == None:
+        color = term.black_on_green if is_highlighted else term.green_on_black
     print(
         term.move_xy(start_coords[0], start_coords[1])
         + color("┌" + "─" * (end_coords[0] - start_coords[0] - 1) + "┐")
@@ -181,12 +191,15 @@ class UcodeEditor:
             editor = NanoEditor(term, (x, y), (6, 1))
             editor.edit_callback = self._evaluate
             editor.is_focused = False
+
+            editor.contents = [list("000000")]
+
             self.reg_editors[i] = editor
 
         self.cursor = [0, 0]
         self.is_editing = False
 
-    def _outline_editor(self, editor, title, is_highlighted):
+    def _outline_editor(self, editor, title, is_highlighted, color=None):
 
         draw_outline(
             term,
@@ -194,13 +207,14 @@ class UcodeEditor:
             (editor.origin[0] + editor.size[0], editor.origin[1] + editor.size[1],),
             is_highlighted=is_highlighted,
             title=title,
+            color=color,
         )
 
-    def _string_to_bools(self, string):
-        assert all([c == "0" or c == "1" for c in string])
-        return [c == "1" for c in string]
+    def _chars_to_bools(self, chars):
+        assert all([c == "0" or c == "1" for c in chars])
+        return [c == "1" for c in chars]
 
-    def _bools_to_string(self, bools):
+    def _bools_to_chars(self, bools):
         return ["1" if b else "0" for b in bools]
 
     def _evaluate(self):
@@ -208,15 +222,15 @@ class UcodeEditor:
         insts = UCode.parse(self.code_editor.contents)
         self.code_editor.highlighted_lines = [i for i, inst in enumerate(insts) if inst is None]
         if len(self.code_editor.highlighted_lines) == 0:
-            input1 = self._string_to_bools(self.reg_editors[0].contents[0])
-            input2 = self._string_to_bools(self.reg_editors[1].contents[1])
-            addr = self._string_to_bools(self.reg_editors[2].contents[2])
+            input1 = self._chars_to_bools(self.reg_editors[0].contents[0])
+            input2 = self._chars_to_bools(self.reg_editors[1].contents[0])
+            addr = self._chars_to_bools(self.reg_editors[2].contents[0])
 
             code = UCode(insts)
             user, output, jump = code.run(input1, input2, addr)
-            self.reg_editors[3].contents = self._bools_to_string(user)
-            self.reg_editors[4].contents = self._bools_to_string(output)
-            self.reg_editors[5].contents = self._bools_to_string(jump)
+            self.reg_editors[3].contents = [self._bools_to_chars(user)]
+            self.reg_editors[4].contents = [self._bools_to_chars(output)]
+            self.reg_editors[5].contents = [self._bools_to_chars(jump)]
 
             self.draw()
 
@@ -230,7 +244,12 @@ class UcodeEditor:
             self.reg_editors,
             ["INPUT1", "INPUT2", "ADDR", "USER", "OUTPUT", "JUMP",],
         ):
-            self._outline_editor(editor, title=title, is_highlighted=(self.cursor == [1, i]))
+            self._outline_editor(
+                editor,
+                title=title,
+                is_highlighted=(self.cursor == [1, i]),
+                color=term.white_on_black if i in [3, 4, 5] else None,
+            )
             editor.draw()
 
     @property
@@ -251,9 +270,8 @@ class UcodeEditor:
             if inp.code == self.term.KEY_ESCAPE:
                 raise NotImplementedError
             elif inp.code == self.term.KEY_ENTER:
-                if self.cursor[0] == 0 or self.cursor[1] < 3:
-                    self.is_editing = True
-                    self._highlighted_editor.is_focused = True
+                self.is_editing = True
+                self._highlighted_editor.is_focused = True
             elif inp.code == self.term.KEY_LEFT:
                 if 0 < self.cursor[0]:
                     self.cursor[0] -= 1
@@ -262,10 +280,10 @@ class UcodeEditor:
                     self.cursor[0] += 1
                 print(self.cursor)
             elif inp.code == self.term.KEY_UP:
-                if 0 < self.cursor[1]:
+                if 0 < self.cursor[1] and self.cursor[0] == 1:
                     self.cursor[1] -= 1
             elif inp.code == self.term.KEY_DOWN:
-                if self.cursor[1] < 5:
+                if self.cursor[1] < 2 and self.cursor[0] == 1:
                     self.cursor[1] += 1
 
         self.draw()

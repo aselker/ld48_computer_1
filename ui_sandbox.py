@@ -123,6 +123,10 @@ class NanoEditor:
         elif inp.code == self.term.KEY_RIGHT:
             if self.cursor[0] < self.size[0] - 1 and self.cursor[0] < len(self.contents[self.cursor[1]]):
                 self.cursor[0] += 1
+        elif inp.code == self.term.KEY_HOME:
+            self.cursor[0] = 0
+        elif inp.code == self.term.KEY_END:
+            self.cursor[0] = len(self.contents[self.cursor[1]])
         elif inp.code == self.term.KEY_UP:
             if 0 < self.cursor[1]:
                 self.cursor[1] -= 1
@@ -135,6 +139,9 @@ class NanoEditor:
             if 0 < self.cursor[0]:
                 del self.contents[self.cursor[1]][self.cursor[0] - 1]
                 self.cursor[0] -= 1
+        elif inp.code == self.term.KEY_DELETE:
+            if self.cursor[0] < len(self.contents[self.cursor[1]]):
+                del self.contents[self.cursor[1]][self.cursor[0]]
         elif inp.code == self.term.KEY_ENTER:
             if self.contents[-1] == [] and self.cursor[1] < self.size[1] - 1:
                 self.contents.pop()
@@ -142,11 +149,8 @@ class NanoEditor:
                 self.cursor[0] = 0
                 self.cursor[1] += 1
         elif inp.upper() in self.legal_chars:
-            if self.cursor[0] < self.size[0]:
-
-                if self.cursor[0] == len(self.contents[self.cursor[1]]):
-                    self.contents[self.cursor[1]].append(" ")
-                self.contents[self.cursor[1]][self.cursor[0]] = inp.upper()
+            if len(self.contents[self.cursor[1]]) < self.size[0]:
+                self.contents[self.cursor[1]].insert(self.cursor[0], inp.upper())
                 if self.cursor[0] < self.size[0] - 1:
                     self.cursor[0] += 1
 
@@ -357,7 +361,7 @@ class AsmEditor:
             self.stack_editor.contents = [list(f"{val:>02} {val:>06b}") for val in self.asm.stack]
             self.stack_editor.contents.reverse()
 
-            if self.asm.pc == self.CODE_HEIGHT - 1 or all(
+            if self.CODE_HEIGHT - 1 <= self.asm.pc or all(
                 ["".join(line).strip() == "" for line in self.code_editor.contents[self.asm.pc :]]
             ):
                 self.is_executing = False

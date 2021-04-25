@@ -31,9 +31,9 @@ puzzles = [
     ],
     [
         "SORT",
-        "Given exactly 10 unique inputs, output\nthem sorted",
-        [[3, 1, 4, 5, 9, 2, 6, 8, 7, 0], [39, 48, 0, 63, 29, 23, 47, 8, 25, 61]],
-        [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [0, 8, 23, 25, 29, 39, 47, 48, 61, 63]],
+        "Given unique inputs less than 10, output\nthem sorted in increasing order.",
+        [[3, 1, 4, 5, 9, 2, 6, 8, 7, 0], [1,7,9,4,3,5,6,0]],
+        [[9,8,7,6,5,4,3,2,1], [9,7,5,4,3,1,0]],
     ],
 ]
 

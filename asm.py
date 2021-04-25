@@ -1,5 +1,4 @@
 def cmd_add(asm):
-    print("Sum:", asm.pipe1 + asm.pipe2)
     return asm.pipe1 + asm.pipe2, None
 
 
@@ -87,9 +86,10 @@ class Asm:
 
         return cmds
 
-    def __init__(self, cmds, ucodes):
+    def __init__(self, cmds, ucodes, num_lines):
         self.cmds = cmds
         self.ucodes = ucodes
+        self.num_lines = num_lines
 
         self.stack = []
         self.pc = 0
@@ -107,8 +107,8 @@ class Asm:
             else:
                 next_pipe2, jump_addr_2 = 0, None
 
-            self.pipe1 = next_pipe1
-            self.pipe2 = next_pipe2
+            self.pipe1 = next_pipe1 % 64
+            self.pipe2 = next_pipe2 % 64
 
             if jump_addr_1 is not None:
                 next_pc = jump_addr_1
@@ -116,12 +116,17 @@ class Asm:
             if jump_addr_2 is not None:
                 next_pc = jump_addr_2
 
+        if self.num_lines <= next_pc:
+            self.pc = 0
+            return False
+
         self.pc = next_pc
+        return True
 
 
     def run(self):
-        while self.pc < len(self.cmds):
-            self.step()
+        while self.step():
+            pass
 
 
 if __name__ == "__main__":

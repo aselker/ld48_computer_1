@@ -1,6 +1,7 @@
 import os
 from blessed import Terminal
 
+from asm import Asm
 from ucode import UCode
 
 
@@ -75,7 +76,7 @@ class NanoEditor:
         self.legal_chars = (
             [chr(d) for d in range(ord("0"), ord("9") + 1)]
             + [chr(c) for c in range(ord("A"), ord("Z") + 1)]
-            + list(" =!@#$%^&*().")
+            + list(" |=!@#$%^&*().")
         )
 
     def edit_callback(self):
@@ -183,9 +184,11 @@ def outline_editor(term, editor, title, color=None):
         color=color,
     )
 
+
 def chars_to_bools(chars):
     assert all([c == "0" or c == "1" for c in chars])
     return [c == "1" for c in chars]
+
 
 def bools_to_chars(bools):
     return ["1" if b else "0" for b in bools]
@@ -294,56 +297,104 @@ class UcodeEditor:
 
         self.draw()
 
+
 class AsmEditor:
     def __init__(self, term):
         self.term = term
 
-        CODE_WIDTH = 32
-        CODE_HEIGHT = 24
-        STACK_WIDTH = 7
-        STACK_HEIGHT = 32
+        self.CODE_WIDTH = 32
+        self.CODE_HEIGHT = 24
+        self.STACK_WIDTH = 9
+        self.STACK_HEIGHT = 32
 
-        self.stack_editor = NanoEditor(term, (1, 1), (STACK_WIDTH, STACK_HEIGHT))
+        self.stack_editor = NanoEditor(term, (1, 1), (self.STACK_WIDTH, self.STACK_HEIGHT))
         self.stack_editor.is_focused = False
 
-        self.code_editor = NanoEditor(term, (STACK_WIDTH + 4, 1), (CODE_WIDTH, CODE_HEIGHT))
+        self.code_editor = NanoEditor(term, (self.STACK_WIDTH + 5, 1), (self.CODE_WIDTH, self.CODE_HEIGHT))
         self.code_editor.edit_callback = self._parse
         self.code_editor.is_focused = False
 
         # Ucode editor buttons, and RUN button
         self.left_buttons = []
         for i in range(4):
-            x = STACK_WIDTH + CODE_WIDTH + 8
+            x = self.STACK_WIDTH + self.CODE_WIDTH + 8
             y = 1 + 4 * i
-            editor = NanoEditor(term, (x, y), (6, 1))
+            editor = NanoEditor(term, (x, y), (7, 1))
             editor.is_focused = False
-            editor.contents = "EDIT" if i < 4 else "RUN"
+            editor.contents = "EDIT" if i < 3 else "RUN ASM"
+            editor.contents = [list(editor.contents)]
 
             self.left_buttons.append(editor)
 
         self.cursor = [0, 0]
         self.is_editing = False
+        self.is_executing = False
 
-    def self._parse(self):
-        pass # XXX
+    def _parse(self):
+        cmds = Asm.parse(self.code_editor.contents)
+        self.code_editor.highlighted_lines = [i for i, cmd in enumerate(cmds) if cmd is None]
+        if len(self.code_editor.highlighted_lines) == 0:
+            self.left_buttons[-1].contents = [list("RUN ASM")]
+        else:
+            self.left_buttons[-1].contents = [list("FIX ERR")]
+
+    def _begin_execution(self):
+        if len(self.code_editor.highlighted_lines) != 0:
+            return
+
+        # TODO: Add ucodes
+        self.asm = Asm(Asm.parse(self.code_editor.contents), [], self.CODE_HEIGHT)
+        self.is_executing = True
+        while self.is_executing:
+            with term.cbreak(), term.hidden_cursor():
+                inp = term.inkey(esc_delay=esc_delay, timeout=0.2)
+            if inp.code == self.term.KEY_ESCAPE:
+                self.is_executing = False
+                self.draw()
+                break
+
+            self.asm.step()
+            self.stack_editor.contents = [list(f"{val:>02} {val:>06b}") for val in self.asm.stack]
+            self.stack_editor.contents.reverse()
+
+            if self.asm.pc == self.CODE_HEIGHT - 1 or all(
+                ["".join(line).strip() == "" for line in self.code_editor.contents[self.asm.pc :]]
+            ):
+                self.is_executing = False
+                self.draw()
+                break
+
+            self.draw()
 
     def draw(self):
+        # Clear the screen
+        # TODO: Remove this for prettiness
+        print(self.term.clear)
 
         if self.is_editing:
             outline_colors = self.term.white_on_black, self.term.black_on_white
         else:
             outline_colors = self.term.green_on_black, self.term.black_on_green
 
-        outline_editor(self.stack_editor, title="STACK", color=outline_colors[0])
+        outline_editor(self.term, self.stack_editor, title="STACK", color=self.term.white_on_black)
         self.stack_editor.draw()
 
-        outline_editor(self.code_editor, title="ASSEMBLY CODE", color=outline_colors[self.cursor[0] == 0])
+        outline_editor(
+            self.term, self.code_editor, title="ASSEMBLY CODE", color=outline_colors[self.cursor[0] == 0]
+        )
         self.code_editor.draw()
 
         for i, button in enumerate(self.left_buttons):
-            title = ["UCODE 1", "UCODE 2", "UCODE 3", "RUN"][i]
-            outline_editor(button, title=title, color=outline_colors[self.cursor == [1, i]])
+            title = ["UCODE1", "UCODE2", "UCODE3", "EXECUTE"][i]
+            outline_editor(self.term, button, title=title, color=outline_colors[self.cursor == [1, i]])
             button.draw()
+
+        # Draw the execution arrow
+        if self.is_executing:
+            arrow_y = self.asm.pc + 1
+        else:
+            arrow_y = 1
+        print(self.term.move_xy(self.STACK_WIDTH + 3, arrow_y) + self.term.red_on_black("→"))
 
     @property
     def _highlighted_editor(self):
@@ -363,9 +414,11 @@ class AsmEditor:
             if inp.code == self.term.KEY_ESCAPE:
                 raise NotImplementedError
             elif inp.code == self.term.KEY_ENTER:
-                if self.cursor == [0,0]:
+                if self.cursor[0] == 0:
                     self.is_editing = True
                     self._highlighted_editor.is_focused = True
+                elif self.cursor == [1, 3]:
+                    self._begin_execution()
                 else:
                     raise NotImplementedError
             elif inp.code == self.term.KEY_LEFT:
@@ -384,35 +437,6 @@ class AsmEditor:
 
         self.draw()
 
-class Screen:
-    def __init__(self, term):
-        self.term = term
-        self.go_to_state(("ucode_editor", 0))
-        while True:
-            with self.term.cbreak(), self.term.hidden_cursor():
-                inp = self.term.inkey(esc_delay=esc_delay)
-            if inp.code == self.term.KEY_ESCAPE:
-                if self.state[0] == "overview":
-                    break
-                elif self.state[0] == "ucode_editor":
-                    self.screen.keypress(inp)
-                    # self.go_to_state(("overview", 0))
-            elif inp.code == self.term.KEY_ENTER:
-                if self.state[0] == "overview":
-                    self.go_to_state(("ucode_editor", 0))
-                elif self.state[0] == "ucode_editor":
-                    self.screen.keypress(inp)
-            else:
-                self.screen.keypress(inp)
-
-    def go_to_state(self, new_state):
-        self.state = new_state
-        if self.state[0] == "overview":
-            self.screen = OverviewScreen(term)
-        elif self.state[0] == "ucode_editor":
-            self.screen = UcodeEditor(term)
-        self.screen.draw()
-
 
 term = Terminal()
 esc_delay = 0.05
@@ -427,6 +451,14 @@ while term.height < 40:
     _ = term.inkey(timeout=0.1)  # Probably better way to do this?
 
 print(term.home + term.clear)
+
+editor = AsmEditor(term)
+# editor = UcodeEditor(term)
+editor.draw()
+while True:
+    with term.cbreak(), term.hidden_cursor():
+        inp = term.inkey(esc_delay=esc_delay)
+        editor.keypress(inp)
 
 
 Screen(term)

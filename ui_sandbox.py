@@ -1,3 +1,4 @@
+import os
 from blessed import Terminal
 
 from ucode import UCode
@@ -173,6 +174,23 @@ def draw_outline(term, start_coords, end_coords, title=None, color=None):
         print(term.move_xy(start_coords[0] + 1, start_coords[1]) + color(title))
 
 
+def outline_editor(term, editor, title, color=None):
+    draw_outline(
+        term,
+        (editor.origin[0] - 1, editor.origin[1] - 1,),
+        (editor.origin[0] + editor.size[0], editor.origin[1] + editor.size[1],),
+        title=title,
+        color=color,
+    )
+
+def chars_to_bools(chars):
+    assert all([c == "0" or c == "1" for c in chars])
+    return [c == "1" for c in chars]
+
+def bools_to_chars(bools):
+    return ["1" if b else "0" for b in bools]
+
+
 class UcodeEditor:
     def __init__(self, term):
         self.term = term
@@ -198,47 +216,29 @@ class UcodeEditor:
         self.cursor = [0, 0]
         self.is_editing = False
 
-    def _outline_editor(self, editor, title, color=None):
-
-        draw_outline(
-            term,
-            (editor.origin[0] - 1, editor.origin[1] - 1,),
-            (editor.origin[0] + editor.size[0], editor.origin[1] + editor.size[1],),
-            title=title,
-            color=color,
-        )
-
-    def _chars_to_bools(self, chars):
-        assert all([c == "0" or c == "1" for c in chars])
-        return [c == "1" for c in chars]
-
-    def _bools_to_chars(self, bools):
-        return ["1" if b else "0" for b in bools]
-
     def _evaluate(self):
         # TODO: Check if inputs have only 1's and 0's
         insts = UCode.parse(self.code_editor.contents)
         self.code_editor.highlighted_lines = [i for i, inst in enumerate(insts) if inst is None]
         if len(self.code_editor.highlighted_lines) == 0:
-            input1 = self._chars_to_bools(self.reg_editors[0].contents[0])
-            input2 = self._chars_to_bools(self.reg_editors[1].contents[0])
-            addr = self._chars_to_bools(self.reg_editors[2].contents[0])
+            input1 = chars_to_bools(self.reg_editors[0].contents[0])
+            input2 = chars_to_bools(self.reg_editors[1].contents[0])
+            addr = chars_to_bools(self.reg_editors[2].contents[0])
 
             code = UCode(insts)
             user, output, jump = code.run(input1, input2, addr)
-            self.reg_editors[3].contents = [self._bools_to_chars(user)]
-            self.reg_editors[4].contents = [self._bools_to_chars(output)]
-            self.reg_editors[5].contents = [self._bools_to_chars(jump)]
+            self.reg_editors[3].contents = [bools_to_chars(user)]
+            self.reg_editors[4].contents = [bools_to_chars(output)]
+            self.reg_editors[5].contents = [bools_to_chars(jump)]
 
             self.draw()
 
     def draw(self):
-
         if self.is_editing:
             outline_color = self.term.black_on_white if (self.cursor[0] == 0) else self.term.white_on_black
         else:
             outline_color = self.term.black_on_green if (self.cursor[0] == 0) else self.term.green_on_black
-        self._outline_editor(self.code_editor, title="MICROCODE", color=outline_color)
+        outline_editor(self.term, self.code_editor, title="MICROCODE", color=outline_color)
 
         self.code_editor.draw()
 
@@ -255,7 +255,7 @@ class UcodeEditor:
                 outline_color = (
                     self.term.black_on_green if (self.cursor == [1, i]) else self.term.green_on_black
                 )
-            self._outline_editor(editor, title=title, color=outline_color)
+            outline_editor(self.term, editor, title=title, color=outline_color)
             editor.draw()
 
     @property
@@ -294,6 +294,95 @@ class UcodeEditor:
 
         self.draw()
 
+class AsmEditor:
+    def __init__(self, term):
+        self.term = term
+
+        CODE_WIDTH = 32
+        CODE_HEIGHT = 24
+        STACK_WIDTH = 7
+        STACK_HEIGHT = 32
+
+        self.stack_editor = NanoEditor(term, (1, 1), (STACK_WIDTH, STACK_HEIGHT))
+        self.stack_editor.is_focused = False
+
+        self.code_editor = NanoEditor(term, (STACK_WIDTH + 4, 1), (CODE_WIDTH, CODE_HEIGHT))
+        self.code_editor.edit_callback = self._parse
+        self.code_editor.is_focused = False
+
+        # Ucode editor buttons, and RUN button
+        self.left_buttons = []
+        for i in range(4):
+            x = STACK_WIDTH + CODE_WIDTH + 8
+            y = 1 + 4 * i
+            editor = NanoEditor(term, (x, y), (6, 1))
+            editor.is_focused = False
+            editor.contents = "EDIT" if i < 4 else "RUN"
+
+            self.left_buttons.append(editor)
+
+        self.cursor = [0, 0]
+        self.is_editing = False
+
+    def self._parse(self):
+        pass # XXX
+
+    def draw(self):
+
+        if self.is_editing:
+            outline_colors = self.term.white_on_black, self.term.black_on_white
+        else:
+            outline_colors = self.term.green_on_black, self.term.black_on_green
+
+        outline_editor(self.stack_editor, title="STACK", color=outline_colors[0])
+        self.stack_editor.draw()
+
+        outline_editor(self.code_editor, title="ASSEMBLY CODE", color=outline_colors[self.cursor[0] == 0])
+        self.code_editor.draw()
+
+        for i, button in enumerate(self.left_buttons):
+            title = ["UCODE 1", "UCODE 2", "UCODE 3", "RUN"][i]
+            outline_editor(button, title=title, color=outline_colors[self.cursor == [1, i]])
+            button.draw()
+
+    @property
+    def _highlighted_editor(self):
+        if self.cursor[0] == 0:
+            return self.code_editor
+        else:
+            return self.left_buttons[self.cursor[1]]
+
+    def keypress(self, inp):
+        if self.is_editing:
+            if inp.code == self.term.KEY_ESCAPE:
+                self.is_editing = False
+                self._highlighted_editor.is_focused = False
+            else:
+                self._highlighted_editor.keypress(inp)
+        else:
+            if inp.code == self.term.KEY_ESCAPE:
+                raise NotImplementedError
+            elif inp.code == self.term.KEY_ENTER:
+                if self.cursor == [0,0]:
+                    self.is_editing = True
+                    self._highlighted_editor.is_focused = True
+                else:
+                    raise NotImplementedError
+            elif inp.code == self.term.KEY_LEFT:
+                if 0 < self.cursor[0]:
+                    self.cursor[0] -= 1
+            elif inp.code == self.term.KEY_RIGHT:
+                if self.cursor[0] < 1:
+                    self.cursor[0] += 1
+                print(self.cursor)
+            elif inp.code == self.term.KEY_UP:
+                if 0 < self.cursor[1] and self.cursor[0] == 1:
+                    self.cursor[1] -= 1
+            elif inp.code == self.term.KEY_DOWN:
+                if self.cursor[1] < 3 and self.cursor[0] == 1:
+                    self.cursor[1] += 1
+
+        self.draw()
 
 class Screen:
     def __init__(self, term):
@@ -301,7 +390,7 @@ class Screen:
         self.go_to_state(("ucode_editor", 0))
         while True:
             with self.term.cbreak(), self.term.hidden_cursor():
-                inp = self.term.inkey()
+                inp = self.term.inkey(esc_delay=esc_delay)
             if inp.code == self.term.KEY_ESCAPE:
                 if self.state[0] == "overview":
                     break
@@ -326,6 +415,7 @@ class Screen:
 
 
 term = Terminal()
+esc_delay = 0.05
 
 while term.width < 120:
     print(term.home + term.clear)

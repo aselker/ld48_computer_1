@@ -9,11 +9,17 @@ OR   (2 arg): 1 if either arg is 1
 NOR  (2 arg): Inverted or
 XOR  (2 arg): 1 if exactly one arg is 1
 XNOR (2 arg): Inverted xor
+IF   (3 arg): Second arg if first is 1,
+              otherwise third arg
 
 Example:
 U1 = BUF I10
 U2 = XOR I3 I4
-O1 = IF U1 U2 I1"""
+O1 = IF U1 U2 I1
+
+Remember, invalid spacing and using the
+wrong number of args are both errors.
+"""
 
 
 class UCode:

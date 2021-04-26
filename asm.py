@@ -11,16 +11,16 @@ PUSH:    push first input onto stack
 POP:     remove top of stack, return it
 SWAP:    swap top two stack entries
 APPEND:  add first input after stack
-OUTPUT:  send first input to OUTPUT
+OUTPUT:  send first input to Output
 CUST1:   run first custom assembly cmd
 CUST2:   run second custom assembly cmd
 CUST3:   run third custom assembly cmd
 
 Example:
-POP 1 | ADD | PUSH
-4 POP|PUSH JMPZERO
+4|JMP
 OUTPUT
-16|JMP"""
+16 POP|PUSH JMPZERO
+POP 1|ADD POP|PUSH ADD|OUTPUT"""
 
 
 def cmd_add(asm):

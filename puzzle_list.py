@@ -30,10 +30,28 @@ puzzles = [
         [[1, 4, 9, 16, 25, 36, 49], [4, 25, 9, 1, 16]],
     ],
     [
+        "COMPARE",
+        "For each pair of inputs, output 1 if the\nsecond is greater, and 0 otherwise",
+        [[14, 23, 25, 21, 27, 27, 19, 37, 28, 16], [56, 35, 56, 21, 30, 36, 11, 11]],
+        [[1, 0, 0, 1, 0], [0, 0, 1, 1]],
+    ],
+    [
+        "MOD",
+        "For each pair of inputs, output the\nremainder when the second is divided by\nthe first.",
+        [[26, 12, 63, 17, 8, 10, 8, 2], [30, 11, 8, 1, 1, 9]],
+        [[0, 8, 12, 2], [1, 0, 8]],
+    ],
+    [
         "SORT",
         "Given unique inputs less than 10, output\nthem sorted in increasing order.",
         [[3, 1, 4, 5, 9, 2, 6, 8, 7, 0], [1, 7, 9, 4, 3, 5, 6, 0]],
-        [[9, 8, 7, 6, 5, 4, 3, 2, 1], [9, 7, 5, 4, 3, 1, 0]],
+        [[1, 2, 3, 4, 5, 6, 7, 8, 9], [0, 1, 3, 4, 5, 7, 9]],
+    ],
+    [
+        "PRIME",
+        "For each input, output 1 if it is prime,\nand 0 otherwise.  Inputs will all be 2 or\nmore.",
+        [[10, 9, 8, 7, 6, 5, 4, 3, 2], [21, 19, 18, 17, 15, 14, 13, 12]],
+        [[1, 1, 0, 1, 0, 1, 0, 0, 0], [0, 1, 0, 0, 1, 0, 1, 0]],
     ],
 ]
 
@@ -50,9 +68,9 @@ class PuzzleList:
         self.info_button.contents = [list(self.info_button.contents)]
 
         self.puzzle_buttons = []
-        for i in range(6):
+        for i in range(9):
             x = 1 + (i % 3) * 25
-            y = 6 + (2 < i) * 5
+            y = 6 + (int(i / 3)) * 5
             editor = NanoEditor(self.term, (x, y), (20, 1))
             editor.is_focused = False
             editor.contents = puzzles[i][0]
@@ -61,7 +79,7 @@ class PuzzleList:
             self.puzzle_buttons.append(editor)
 
         self.info_screen = InfoScreen(self.term)
-        self.asm_sub_editors = [AsmEditor(self.term, esc_delay, puzzles[i]) for i in range(6)]
+        self.asm_sub_editors = [AsmEditor(self.term, esc_delay, puzzles[i]) for i in range(len(puzzles))]
 
         self.cursor = [0, 0]
         self.is_editing = False
@@ -113,7 +131,7 @@ class PuzzleList:
                 if 0 < self.cursor[1]:
                     self.cursor[1] -= 1
             elif inp.code == self.term.KEY_DOWN:
-                if self.cursor[1] < 2:
+                if self.cursor[1] < 3:
                     self.cursor[1] += 1
 
         if do_draw:

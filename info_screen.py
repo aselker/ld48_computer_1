@@ -9,7 +9,7 @@ Your new computer comes with a beautiful 4-color display, a 5 Hz CPU, and a buil
 
 The DEEPER BROS. (R) DIGITAL COMPUTER v0.23 is programmed using two languages: Deep Assembly language, and Deeper Microcode.  Programs are written in Deep Assembly, and Deeper Microcode is used to create custom Deep Assembly commands.
 
-NOTE: Programming the DEEPER BROS. (R) DIGITAL COMPUTER v0.23 is not for the faint of heart.""",
+NOTE: Programming the DEEPER BROS. (R) DIGITAL COMPUTER v0.23 is not for the faint of heart.  At DEEPER BROS. INC., we have not yet had success building programs 7, 8, or 9.  Good luck.""",
 
 """DEEP ASSEMBLY
 Each line of Deep Assembly consists of commands or pairs of commands, separated by pipe characters (|).  This is an example program:

@@ -45,7 +45,7 @@ puzzles = [
         "SORT",
         "Given unique inputs less than 10, output\nthem sorted in increasing order.",
         [[3, 1, 4, 5, 9, 2, 6, 8, 7, 0], [1, 7, 9, 4, 3, 5, 6, 0]],
-        [[1, 2, 3, 4, 5, 6, 7, 8, 9], [0, 1, 3, 4, 5, 7, 9]],
+        [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [0, 1, 3, 4, 5, 7, 9]],
     ],
     [
         "PRIME",

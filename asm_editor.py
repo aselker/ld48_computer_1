@@ -127,7 +127,7 @@ class AsmEditor:
                     self.asm.pc = 0
                     self.output = []
 
-            if self.CODE_HEIGHT - 1 <= self.asm.pc or all(
+            if self.CODE_HEIGHT <= self.asm.pc or all(
                 ["".join(line).strip() == "" for line in self.code_editor.contents[self.asm.pc :]]
             ):
                 self.is_executing = False

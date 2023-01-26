@@ -16,7 +16,9 @@ while True:
     while term.width < 125 or term.height < 42:
         while term.width < 125:
             print(term.home + term.clear)
-            print(term.white_on_black("Please resize terminal to at least 125 columns."))
+            print(
+                term.white_on_black("Please resize terminal to at least 125 columns.")
+            )
             _ = term.inkey(timeout=0.1)  # Probably better way to do this?
         while term.height < 42:
             print(term.home + term.clear)

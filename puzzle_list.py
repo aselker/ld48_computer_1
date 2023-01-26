@@ -4,7 +4,12 @@ from asm_editor import AsmEditor
 
 # A puzzle is a list of [title, description, inputs, outputs]
 puzzles = [
-    ["COUNT TO 10", "Output numbers from 1 to 10 in order", [[]], [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]],],
+    [
+        "COUNT TO 10",
+        "Output numbers from 1 to 10 in order",
+        [[]],
+        [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]],
+    ],
     [
         "POWER OF 2",
         "For each input, output the nth power of 2",
@@ -79,7 +84,9 @@ class PuzzleList:
             self.puzzle_buttons.append(editor)
 
         self.info_screen = InfoScreen(self.term)
-        self.asm_sub_editors = [AsmEditor(self.term, esc_delay, puzzles[i]) for i in range(len(puzzles))]
+        self.asm_sub_editors = [
+            AsmEditor(self.term, esc_delay, puzzles[i]) for i in range(len(puzzles))
+        ]
 
         self.cursor = [0, 0]
         self.is_editing = False
@@ -88,15 +95,24 @@ class PuzzleList:
         print(self.term.clear)
 
         is_highlighted = self.cursor[1] == 0
-        outline_color = self.term.black_on_green if is_highlighted else self.term.green_on_black
+        outline_color = (
+            self.term.black_on_green if is_highlighted else self.term.green_on_black
+        )
         # outline_color = self.term.white_on_black
-        outline_editor(self.term, self.info_button, "DEEPER BROS. (R) DIGITAL COMPUTER v0.23", outline_color)
+        outline_editor(
+            self.term,
+            self.info_button,
+            "DEEPER BROS. (R) DIGITAL COMPUTER v0.23",
+            outline_color,
+        )
         self.info_button.draw()
 
         for i, button in enumerate(self.puzzle_buttons):
             title = "PROGRAM " + str(i + 1)
             is_highlighted = (self.cursor[1] * 3) + self.cursor[0] == i + 3
-            outline_color = self.term.black_on_green if is_highlighted else self.term.green_on_black
+            outline_color = (
+                self.term.black_on_green if is_highlighted else self.term.green_on_black
+            )
             outline_editor(self.term, button, title, color=outline_color)
             button.draw()
 
@@ -106,9 +122,9 @@ class PuzzleList:
             if self.cursor[1] == 0:
                 self.is_editing = self.info_screen.keypress(inp)
             else:
-                self.is_editing = self.asm_sub_editors[(self.cursor[1] * 3) + self.cursor[0] - 3].keypress(
-                    inp
-                )
+                self.is_editing = self.asm_sub_editors[
+                    (self.cursor[1] * 3) + self.cursor[0] - 3
+                ].keypress(inp)
             do_draw = not self.is_editing
         else:
             if inp.code == self.term.KEY_ESCAPE:
@@ -119,7 +135,9 @@ class PuzzleList:
                     self.info_screen.draw()
                     do_draw = False
                 else:
-                    self.asm_sub_editors[(self.cursor[1] * 3) + self.cursor[0] - 3].draw()
+                    self.asm_sub_editors[
+                        (self.cursor[1] * 3) + self.cursor[0] - 3
+                    ].draw()
                     do_draw = False
             elif inp.code == self.term.KEY_LEFT:
                 if 0 < self.cursor[0] and self.cursor[1] != 0:

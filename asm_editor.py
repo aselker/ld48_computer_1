@@ -14,7 +14,9 @@ class AsmEditor:
         self.STACK_WIDTH = 9
         self.STACK_HEIGHT = 32
 
-        self.stack_editor = NanoEditor(term, (1, 1), (self.STACK_WIDTH, self.STACK_HEIGHT))
+        self.stack_editor = NanoEditor(
+            term, (1, 1), (self.STACK_WIDTH, self.STACK_HEIGHT)
+        )
         self.stack_editor.is_focused = False
 
         # Fill the stack
@@ -22,17 +24,23 @@ class AsmEditor:
         self.asm.stack = self.puzzle[2][0].copy()
         self._fill_stack_editor()
 
-        self.code_editor = NanoEditor(term, (self.STACK_WIDTH + 6, 1), (self.CODE_WIDTH, self.CODE_HEIGHT))
+        self.code_editor = NanoEditor(
+            term, (self.STACK_WIDTH + 6, 1), (self.CODE_WIDTH, self.CODE_HEIGHT)
+        )
         self.code_editor.edit_callback = self._parse
         self.code_editor.is_focused = False
 
         self.output_editor = NanoEditor(
-            term, (self.STACK_WIDTH + self.CODE_WIDTH + 19, 1), (self.STACK_WIDTH, self.STACK_HEIGHT)
+            term,
+            (self.STACK_WIDTH + self.CODE_WIDTH + 19, 1),
+            (self.STACK_WIDTH, self.STACK_HEIGHT),
         )
         self.output_editor.is_focused = False
 
         self.info_editor = NanoEditor(
-            term, (self.STACK_WIDTH * 2 + self.CODE_WIDTH + 22, 1), (41, self.STACK_HEIGHT)
+            term,
+            (self.STACK_WIDTH * 2 + self.CODE_WIDTH + 22, 1),
+            (41, self.STACK_HEIGHT),
         )
         self.info_editor.is_focused = False
         info = ["Goal:"] + self.puzzle[1].split("\n") + [""] + asm_ref_sheet.split("\n")
@@ -59,7 +67,9 @@ class AsmEditor:
 
     def _parse(self):
         cmds = Asm.parse(self.code_editor.contents)
-        self.code_editor.highlighted_lines = [i for i, cmd in enumerate(cmds) if cmd is None]
+        self.code_editor.highlighted_lines = [
+            i for i, cmd in enumerate(cmds) if cmd is None
+        ]
         if len(self.code_editor.highlighted_lines) == 0:
             self.left_buttons[-1].contents = [list("")]
         else:
@@ -69,7 +79,9 @@ class AsmEditor:
         return f"{val:>02} {val:>06b}"
 
     def _fill_stack_editor(self):
-        self.stack_editor.contents = [list(self._num_to_dec_bin(val)) for val in self.asm.stack]
+        self.stack_editor.contents = [
+            list(self._num_to_dec_bin(val)) for val in self.asm.stack
+        ]
         self.stack_editor.contents.reverse()
         # self.stack_editor.contents = self.stack_editor.contents + [[]] * ( self.stack_editor.size[1] - len(self.asm.stack))
 
@@ -79,7 +91,9 @@ class AsmEditor:
 
         def output_callback(_, val):
             self.output.append(val)
-            self.output_editor.contents = [list(self._num_to_dec_bin(val)) for val in self.output]
+            self.output_editor.contents = [
+                list(self._num_to_dec_bin(val)) for val in self.output
+            ]
 
         ucodes = [editor.ucode for editor in self.ucode_sub_editors]
         self.asm = Asm(Asm.parse(self.code_editor.contents), ucodes, self.CODE_HEIGHT)
@@ -113,7 +127,12 @@ class AsmEditor:
                         "passed all of the test cases.",
                     ]
                     win_editor.contents = [list(line) for line in win_editor.contents]
-                    outline_editor(self.term, win_editor, title="SUCCESS!", color=self.term.black_on_green)
+                    outline_editor(
+                        self.term,
+                        win_editor,
+                        title="SUCCESS!",
+                        color=self.term.black_on_green,
+                    )
                     win_editor.draw()
                     with self.term.cbreak(), self.term.hidden_cursor():
                         _ = self.term.inkey(esc_delay=self.esc_delay)
@@ -122,13 +141,16 @@ class AsmEditor:
                     break
                 else:
                     # Reset and start again!
-                    test_case += 1 
+                    test_case += 1
                     self.asm.stack = self.puzzle[2][test_case].copy()
                     self.asm.pc = 0
                     self.output = []
 
             if self.CODE_HEIGHT <= self.asm.pc or all(
-                ["".join(line).strip() == "" for line in self.code_editor.contents[self.asm.pc :]]
+                [
+                    "".join(line).strip() == ""
+                    for line in self.code_editor.contents[self.asm.pc :]
+                ]
             ):
                 self.is_executing = False
                 self.draw()
@@ -145,23 +167,40 @@ class AsmEditor:
         else:
             outline_colors = self.term.green_on_black, self.term.black_on_green
 
-        outline_editor(self.term, self.stack_editor, title="STACK", color=self.term.white_on_black)
+        outline_editor(
+            self.term, self.stack_editor, title="STACK", color=self.term.white_on_black
+        )
         self.stack_editor.draw()
 
         outline_editor(
-            self.term, self.code_editor, title="DEEP ASSEMBLY", color=outline_colors[self.cursor[0] == 0]
+            self.term,
+            self.code_editor,
+            title="DEEP ASSEMBLY",
+            color=outline_colors[self.cursor[0] == 0],
         )
         self.code_editor.draw()
 
-        outline_editor(self.term, self.output_editor, title="OUTPUT", color=self.term.white_on_black)
+        outline_editor(
+            self.term,
+            self.output_editor,
+            title="OUTPUT",
+            color=self.term.white_on_black,
+        )
         self.output_editor.draw()
 
-        outline_editor(self.term, self.info_editor, title="INFO", color=self.term.white_on_black)
+        outline_editor(
+            self.term, self.info_editor, title="INFO", color=self.term.white_on_black
+        )
         self.info_editor.draw()
 
         for i, button in enumerate(self.left_buttons):
             title = ["CUST1", "CUST2", "CUST3", "EXECUTE"][i]
-            outline_editor(self.term, button, title=title, color=outline_colors[self.cursor == [1, i]])
+            outline_editor(
+                self.term,
+                button,
+                title=title,
+                color=outline_colors[self.cursor == [1, i]],
+            )
             button.draw()
 
         # Draw the execution arrow
@@ -169,12 +208,18 @@ class AsmEditor:
             arrow_y = self.asm.pc + 1
         else:
             arrow_y = 1
-        print(self.term.move_xy(self.STACK_WIDTH + 4, arrow_y) + self.term.red_on_black("→"))
+        print(
+            self.term.move_xy(self.STACK_WIDTH + 4, arrow_y)
+            + self.term.red_on_black("→")
+        )
 
         # Line numbers
         for y in range(self.CODE_HEIGHT):
             if y + 1 != arrow_y:
-                print(self.term.move_xy(self.STACK_WIDTH + 3, y + 1) + self.term.white_on_black(str(y)))
+                print(
+                    self.term.move_xy(self.STACK_WIDTH + 3, y + 1)
+                    + self.term.white_on_black(str(y))
+                )
 
     @property
     def _highlighted_editor(self):

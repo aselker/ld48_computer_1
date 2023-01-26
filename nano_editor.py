@@ -1,6 +1,6 @@
 def chars_to_bools(chars):
     # assert all([c == "0" or c == "1" for c in chars])
-    return [c == "1" for c in chars] + [False]* (6-len(chars))
+    return [c == "1" for c in chars] + [False] * (6 - len(chars))
 
 
 def bools_to_chars(bools):
@@ -30,8 +30,14 @@ def draw_outline(term, start_coords, end_coords, title=None, color=None):
 def outline_editor(term, editor, title, color=None):
     draw_outline(
         term,
-        (editor.origin[0] - 1, editor.origin[1] - 1,),
-        (editor.origin[0] + editor.size[0], editor.origin[1] + editor.size[1],),
+        (
+            editor.origin[0] - 1,
+            editor.origin[1] - 1,
+        ),
+        (
+            editor.origin[0] + editor.size[0],
+            editor.origin[1] + editor.size[1],
+        ),
         title=title,
         color=color,
     )
@@ -63,9 +69,9 @@ class NanoEditor:
 
     def draw(self):
         if len(self.contents) < self.size[1]:
-            contents = self.contents + [[]]*(self.size[1]-len(self.contents) )
+            contents = self.contents + [[]] * (self.size[1] - len(self.contents))
         elif len(self.contents) > self.size[1]:
-            contents = self.contents[:self.size[1]]
+            contents = self.contents[: self.size[1]]
         else:
             contents = self.contents
 
@@ -73,7 +79,9 @@ class NanoEditor:
             line = "".join(line)
 
             line_color = (
-                self.term.white_on_black if (y not in self.highlighted_lines) else self.term.black_on_red
+                self.term.white_on_black
+                if (y not in self.highlighted_lines)
+                else self.term.black_on_red
             )
             cursor_color = (
                 # self.term.black_on_green if (y not in self.highlighted_lines) else self.term.black_on_white
@@ -106,7 +114,9 @@ class NanoEditor:
             if 0 < self.cursor[0]:
                 self.cursor[0] -= 1
         elif inp.code == self.term.KEY_RIGHT:
-            if self.cursor[0] < self.size[0] - 1 and self.cursor[0] < len(self.contents[self.cursor[1]]):
+            if self.cursor[0] < self.size[0] - 1 and self.cursor[0] < len(
+                self.contents[self.cursor[1]]
+            ):
                 self.cursor[0] += 1
         elif inp.code == self.term.KEY_HOME:
             self.cursor[0] = 0

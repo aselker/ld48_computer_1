@@ -120,7 +120,9 @@ class InfoScreen:
         self._fill_screen()
 
         outline_color = self.term.white_on_black
-        title = "INFO PAGE " + str(self.current_screen + 1) + " OF " + str(self.num_screens)
+        title = (
+            "INFO PAGE " + str(self.current_screen + 1) + " OF " + str(self.num_screens)
+        )
         outline_editor(self.term, self.info_screen, title, outline_color)
         self.info_screen.draw()
 

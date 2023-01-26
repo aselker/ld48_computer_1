@@ -1,6 +1,7 @@
 from nano_editor import NanoEditor, outline_editor, chars_to_bools, bools_to_chars
 from ucode import UCode, ucode_ref_sheet
 
+
 class UcodeEditor:
     def __init__(self, term):
         self.term = term
@@ -19,17 +20,14 @@ class UcodeEditor:
             editor.edit_callback = self._evaluate
             editor.is_focused = False
 
-            editor.contents = [list("000000")] if i<5 else [list("000001")]
+            editor.contents = [list("000000")] if i < 5 else [list("000001")]
 
             self.reg_editors[i] = editor
 
-        self.info_editor = NanoEditor(
-                term, (CODE_WIDTH + 13, 1), (39, 32)
-                )
+        self.info_editor = NanoEditor(term, (CODE_WIDTH + 13, 1), (39, 32))
         self.info_editor.is_focused = False
         info = ucode_ref_sheet.split("\n")
         self.info_editor.contents = [list(line) for line in info]
-
 
         self.ucode = UCode([])
         self.cursor = [0, 0]
@@ -38,7 +36,9 @@ class UcodeEditor:
     def _evaluate(self):
         # TODO: Check if inputs have only 1's and 0's
         insts = UCode.parse(self.code_editor.contents)
-        self.code_editor.highlighted_lines = [i for i, inst in enumerate(insts) if inst is None]
+        self.code_editor.highlighted_lines = [
+            i for i, inst in enumerate(insts) if inst is None
+        ]
         if len(self.code_editor.highlighted_lines) == 0:
             input1 = chars_to_bools(self.reg_editors[0].contents[0])
             input2 = chars_to_bools(self.reg_editors[1].contents[0])
@@ -52,7 +52,7 @@ class UcodeEditor:
 
             self.draw()
         else:
-            for i in [3,4,5]:
+            for i in [3, 4, 5]:
                 self.reg_editors[i].contents = [[]]
 
     def draw(self):
@@ -61,27 +61,50 @@ class UcodeEditor:
         print(self.term.clear)
 
         if self.is_editing:
-            outline_color = self.term.black_on_white if (self.cursor[0] == 0) else self.term.white_on_black
+            outline_color = (
+                self.term.black_on_white
+                if (self.cursor[0] == 0)
+                else self.term.white_on_black
+            )
         else:
-            outline_color = self.term.black_on_green if (self.cursor[0] == 0) else self.term.green_on_black
-        outline_editor(self.term, self.code_editor, title="DEEPER MICROCODE", color=outline_color)
+            outline_color = (
+                self.term.black_on_green
+                if (self.cursor[0] == 0)
+                else self.term.green_on_black
+            )
+        outline_editor(
+            self.term, self.code_editor, title="DEEPER MICROCODE", color=outline_color
+        )
         self.code_editor.draw()
 
-        outline_editor(self.term, self.info_editor, title="INFO", color=self.term.white_on_black)
+        outline_editor(
+            self.term, self.info_editor, title="INFO", color=self.term.white_on_black
+        )
         self.info_editor.draw()
 
         for i, editor, title in zip(
             range(len(self.reg_editors)),
             self.reg_editors,
-            ["INPUT1", "INPUT2", "ADDR", "USER", "OUTPUT", "JUMP",],
+            [
+                "INPUT1",
+                "INPUT2",
+                "ADDR",
+                "USER",
+                "OUTPUT",
+                "JUMP",
+            ],
         ):
             if self.is_editing or i in [3, 4, 5]:
                 outline_color = (
-                    self.term.black_on_white if (self.cursor == [1, i]) else self.term.white_on_black
+                    self.term.black_on_white
+                    if (self.cursor == [1, i])
+                    else self.term.white_on_black
                 )
             else:
                 outline_color = (
-                    self.term.black_on_green if (self.cursor == [1, i]) else self.term.green_on_black
+                    self.term.black_on_green
+                    if (self.cursor == [1, i])
+                    else self.term.green_on_black
                 )
             outline_editor(self.term, editor, title=title, color=outline_color)
             editor.draw()
@@ -122,4 +145,3 @@ class UcodeEditor:
 
         self.draw()
         return True
-

@@ -43,7 +43,7 @@ class UCode:
             if len(words) < 4 or words[1] != "=":
                 insts.append(None)
                 continue
-            del(words[1])
+            del words[1]
 
             # Check number of arguments
             num_args = {
@@ -55,7 +55,8 @@ class UCode:
                 "nor": 2,
                 "xor": 2,
                 "xnor": 2,
-                "if": 3,}
+                "if": 3,
+            }
             if len(words) != num_args.get(words[1], -999) + 2:
                 insts.append(None)
                 continue
@@ -68,7 +69,7 @@ class UCode:
                     break
 
                 # Can't write to input regs
-                if i==0 and name[0] in ["c", "i", "a"]:
+                if i == 0 and name[0] in ["c", "i", "a"]:
                     ok = False
                     break
 
@@ -78,11 +79,11 @@ class UCode:
                         ok = False
                         break
                 elif name[0] in ["u", "o", "a", "j"]:
-                    if int(name[1:]) < 1 or 6 < int(name[1:]) :
+                    if int(name[1:]) < 1 or 6 < int(name[1:]):
                         ok = False
                         break
                 elif name[0] in ["i"]:
-                    if int(name[1:]) < 1 or 12 < int(name[1:]) :
+                    if int(name[1:]) < 1 or 12 < int(name[1:]):
                         ok = False
                         break
                 else:
@@ -94,10 +95,7 @@ class UCode:
                 insts.append(None)
                 continue
 
-
         return insts
-
-
 
     def __init__(self, insts):
         self.insts = insts
@@ -105,14 +103,13 @@ class UCode:
         self.output_regs = [False] * 6
         self.jump_regs = [False] * 6
 
-
     def get_reg(self, name):
         bank = name[0]
         index = int(name[1:]) - 1
         if bank == "u":
             return self.user_regs[index]
         elif bank == "c":
-            return bool(index+1)
+            return bool(index + 1)
         elif bank == "i":
             return self.input_regs[index]
         elif bank == "o":
@@ -142,7 +139,9 @@ class UCode:
         if not inst:
             return
 
-        args = [self.get_reg(arg) for arg in inst[2:]] + [False]*3 # Buffer for unused
+        args = [self.get_reg(arg) for arg in inst[2:]] + [
+            False
+        ] * 3  # Buffer for unused
 
         self.set_reg(
             inst[0],
@@ -165,8 +164,7 @@ class UCode:
         self.addr_regs = addr.copy()
 
         # By default, continue to next line
-        self.jump_regs = (UintN.from_bits(addr.copy()) + UintN(1,6)).bits()
-
+        self.jump_regs = (UintN.from_bits(addr.copy()) + UintN(1, 6)).bits()
 
         for inst in self.insts:
             self.run_single_instruction(inst)

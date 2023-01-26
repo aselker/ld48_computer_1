@@ -75,9 +75,11 @@ def cmd_swap(asm):
     asm.stack.append(second)
     return asm.pipe1, None
 
+
 def cmd_append(asm):
     asm.stack.insert(0, asm.pipe1)
     return asm.pipe1, None
+
 
 def cmd_output(asm):
     asm.output(asm.pipe1)
@@ -165,7 +167,7 @@ class Asm:
                 for word in words:
                     if word.isdigit():
                         literal = int(word)
-                        if 0 <= literal and literal < 2 ** 6:
+                        if 0 <= literal and literal < 2**6:
                             new_words.append(make_literal_fn(literal))
                         else:
                             ok2 = False
@@ -234,7 +236,14 @@ class Asm:
 
 
 if __name__ == "__main__":
-    cmds = Asm.parse(["1 1 | add | push", "pop 2 | add | jmp", "3 | push", "5 | push",])
+    cmds = Asm.parse(
+        [
+            "1 1 | add | push",
+            "pop 2 | add | jmp",
+            "3 | push",
+            "5 | push",
+        ]
+    )
     print("Cmds:", cmds)
 
     asm = Asm(cmds, [])
